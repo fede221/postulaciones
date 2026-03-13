@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AdminSidebar from "@/components/AdminSidebar";
 import StatusBadge from "./StatusBadge";
-import StatusUpdater from "./StatusUpdater";
+import ApplicationCard from "./ApplicationCard";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +32,10 @@ export default async function AdminApplicationsPage({
       ...(jobId ? { jobId } : {}),
       ...(status ? { status } : {}),
     },
-    include: { job: { select: { title: true, department: true } } },
+    include: {
+      job: { select: { title: true, department: true } },
+      statusHistory: { orderBy: { createdAt: "asc" } },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -51,6 +54,12 @@ export default async function AdminApplicationsPage({
             <h1 className="text-2xl font-extrabold text-slate-800">Postulaciones</h1>
             <p className="text-slate-500 text-sm mt-1">{applications.length} postulaciones</p>
           </div>
+          <Link
+            href="/admin/applicants"
+            className="text-sm text-blue-600 hover:text-blue-700 font-semibold"
+          >
+            Ver historial por postulante →
+          </Link>
         </div>
 
         {/* Filters */}
@@ -97,58 +106,9 @@ export default async function AdminApplicationsPage({
             <p className="text-slate-500">Aún no se han recibido postulaciones para los filtros seleccionados.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {applications.map((app) => (
-              <div key={app.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm transition-shadow">
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <StatusBadge status={app.status} />
-                      <span className="text-xs text-slate-400">{new Date(app.createdAt).toLocaleDateString("es-AR")} · {new Date(app.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}</span>
-                    </div>
-
-                    <h3 className="font-bold text-slate-800 text-lg">
-                      {app.firstName} {app.lastName}
-                    </h3>
-                    <div className="flex flex-wrap gap-3 text-sm text-slate-500 mt-1">
-                      <span>✉️ {app.email}</span>
-                      {app.phone && <span>📱 {app.phone}</span>}
-                    </div>
-
-                    <div className="mt-2">
-                      <span className="inline-block bg-blue-50 text-blue-600 text-xs font-semibold px-2 py-0.5 rounded">
-                        {app.job.title}
-                      </span>
-                      <span className="text-xs text-slate-400 ml-2">{app.job.department}</span>
-                    </div>
-
-                    {app.coverLetter && (
-                      <details className="mt-3">
-                        <summary className="text-sm text-blue-600 cursor-pointer hover:text-blue-700 font-medium">
-                          Ver carta de presentación
-                        </summary>
-                        <div className="mt-2 text-sm text-slate-600 bg-slate-50 rounded-lg p-3 whitespace-pre-line leading-relaxed">
-                          {app.coverLetter}
-                        </div>
-                      </details>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 shrink-0">
-                    {app.cvPath && (
-                      <a
-                        href={app.cvPath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-200 transition-colors"
-                      >
-                        📄 Ver CV
-                      </a>
-                    )}
-                    <StatusUpdater applicationId={app.id} currentStatus={app.status} />
-                  </div>
-                </div>
-              </div>
+              <ApplicationCard key={app.id} app={app} />
             ))}
           </div>
         )}

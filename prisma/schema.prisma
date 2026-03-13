@@ -13,8 +13,8 @@ model Job {
   department   String
   location     String
   type         String
-  description  String
-  requirements String
+  description  String        @db.Text
+  requirements String        @db.Text
   isActive     Boolean       @default(true)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -22,17 +22,29 @@ model Job {
 }
 
 model Application {
-  id          String   @id @default(cuid())
-  jobId       String
-  job         Job      @relation(fields: [jobId], references: [id])
-  firstName   String
-  lastName    String
-  email       String
-  phone       String?
-  coverLetter String?
-  cvPath      String?
-  status      String   @default("pending")
-  createdAt   DateTime @default(now())
+  id            String                     @id @default(cuid())
+  jobId         String
+  job           Job                        @relation(fields: [jobId], references: [id])
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+  coverLetter   String?                    @db.Text
+  cvPath        String?
+  status        String                     @default("pending")
+  notes         String?                    @db.Text
+  createdAt     DateTime                   @default(now())
+  statusHistory ApplicationStatusHistory[]
+}
+
+model ApplicationStatusHistory {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  fromStatus    String?
+  toStatus      String
+  note          String?     @db.Text
+  createdAt     DateTime    @default(now())
 }
 
 model Admin {

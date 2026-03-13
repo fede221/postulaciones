@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 const navItems = [
   { href: "/admin/jobs", label: "Puestos", icon: "💼" },
   { href: "/admin/applications", label: "Postulaciones", icon: "📋" },
+  { href: "/admin/applicants", label: "Postulantes", icon: "👤" },
 ];
 
 export default function AdminSidebar() {
