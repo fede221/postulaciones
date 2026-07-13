@@ -22,19 +22,27 @@ model Job {
 }
 
 model Application {
-  id            String                     @id @default(cuid())
-  jobId         String
-  job           Job                        @relation(fields: [jobId], references: [id])
-  firstName     String
-  lastName      String
-  email         String
-  phone         String?
-  coverLetter   String?                    @db.Text
-  cvPath        String?
-  status        String                     @default("pending")
-  notes         String?                    @db.Text
-  createdAt     DateTime                   @default(now())
-  statusHistory ApplicationStatusHistory[]
+  id                String                     @id @default(cuid())
+  jobId             String
+  job               Job                        @relation(fields: [jobId], references: [id])
+  firstName         String
+  lastName          String
+  email             String
+  phone             String?
+  city              String?
+  linkedinUrl       String?
+  yearsExperience   Int?
+  educationLevel    String?
+  workMode          String?
+  availability      String?
+  salaryExpectation String?
+  skills            String?                    @db.Text
+  coverLetter       String?                    @db.Text
+  cvPath            String?
+  status            String                     @default("pending")
+  notes             String?                    @db.Text
+  createdAt         DateTime                   @default(now())
+  statusHistory     ApplicationStatusHistory[]
 }
 
 model ApplicationStatusHistory {

@@ -12,6 +12,15 @@ export async function POST(req: NextRequest) {
     const lastName = formData.get("lastName") as string;
     const email = formData.get("email") as string;
     const phone = formData.get("phone") as string | null;
+    const city = formData.get("city") as string | null;
+    const linkedinUrl = formData.get("linkedinUrl") as string | null;
+    const yearsExperienceRaw = formData.get("yearsExperience") as string | null;
+    const yearsExperience = yearsExperienceRaw ? parseInt(yearsExperienceRaw, 10) : null;
+    const educationLevel = formData.get("educationLevel") as string | null;
+    const workMode = formData.get("workMode") as string | null;
+    const availability = formData.get("availability") as string | null;
+    const salaryExpectation = formData.get("salaryExpectation") as string | null;
+    const skills = formData.get("skills") as string | null;
     const coverLetter = formData.get("coverLetter") as string | null;
     const cv = formData.get("cv") as File | null;
 
@@ -57,6 +66,14 @@ export async function POST(req: NextRequest) {
         lastName,
         email,
         phone: phone || null,
+        city: city || null,
+        linkedinUrl: linkedinUrl || null,
+        yearsExperience: Number.isFinite(yearsExperience) ? yearsExperience : null,
+        educationLevel: educationLevel || null,
+        workMode: workMode || null,
+        availability: availability || null,
+        salaryExpectation: salaryExpectation || null,
+        skills: skills || null,
         coverLetter: coverLetter || null,
         cvPath,
       },

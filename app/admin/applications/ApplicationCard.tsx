@@ -25,6 +25,14 @@ interface App {
   lastName: string;
   email: string;
   phone: string | null;
+  city: string | null;
+  linkedinUrl: string | null;
+  yearsExperience: number | null;
+  educationLevel: string | null;
+  workMode: string | null;
+  availability: string | null;
+  salaryExpectation: string | null;
+  skills: string | null;
   coverLetter: string | null;
   cvPath: string | null;
   status: string;
@@ -97,6 +105,13 @@ export default function ApplicationCard({ app }: { app: App }) {
           <div className="flex flex-wrap gap-3 text-sm text-slate-500 mt-1">
             <span>✉️ {app.email}</span>
             {app.phone && <span>📱 {app.phone}</span>}
+            {app.city && <span>📍 {app.city}</span>}
+            {app.linkedinUrl && (
+              <a href={app.linkedinUrl} target="_blank" rel="noopener noreferrer"
+                className="text-blue-500 hover:underline">
+                LinkedIn ↗
+              </a>
+            )}
           </div>
 
           <div className="mt-2 flex flex-wrap gap-2">
@@ -136,6 +151,57 @@ export default function ApplicationCard({ app }: { app: App }) {
       {/* Expanded panel */}
       {expanded && (
         <div className="border-t border-slate-100 px-5 py-5 space-y-5 bg-slate-50">
+          {/* Professional profile summary */}
+          {(app.yearsExperience != null || app.educationLevel || app.workMode || app.availability || app.salaryExpectation || app.skills) && (
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Perfil profesional</p>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {app.yearsExperience != null && (
+                  <div className="bg-white rounded-xl px-4 py-3 border border-slate-100">
+                    <p className="text-xs text-slate-400 mb-0.5">Experiencia</p>
+                    <p className="text-sm font-semibold text-slate-700">{app.yearsExperience === 0 ? "Sin experiencia" : `${app.yearsExperience} año${app.yearsExperience !== 1 ? "s" : ""}`}</p>
+                  </div>
+                )}
+                {app.educationLevel && (
+                  <div className="bg-white rounded-xl px-4 py-3 border border-slate-100">
+                    <p className="text-xs text-slate-400 mb-0.5">Estudios</p>
+                    <p className="text-sm font-semibold text-slate-700 capitalize">{app.educationLevel.replace(/_/g, " ")}</p>
+                  </div>
+                )}
+                {app.workMode && (
+                  <div className="bg-white rounded-xl px-4 py-3 border border-slate-100">
+                    <p className="text-xs text-slate-400 mb-0.5">Modalidad</p>
+                    <p className="text-sm font-semibold text-slate-700 capitalize">{app.workMode}</p>
+                  </div>
+                )}
+                {app.availability && (
+                  <div className="bg-white rounded-xl px-4 py-3 border border-slate-100">
+                    <p className="text-xs text-slate-400 mb-0.5">Disponibilidad</p>
+                    <p className="text-sm font-semibold text-slate-700">{app.availability.replace(/_/g, " ")}</p>
+                  </div>
+                )}
+                {app.salaryExpectation && (
+                  <div className="bg-white rounded-xl px-4 py-3 border border-slate-100 sm:col-span-2">
+                    <p className="text-xs text-slate-400 mb-0.5">Pretensión salarial</p>
+                    <p className="text-sm font-semibold text-slate-700">{app.salaryExpectation}</p>
+                  </div>
+                )}
+              </div>
+              {app.skills && (
+                <div className="mt-3 bg-white rounded-xl px-4 py-3 border border-slate-100">
+                  <p className="text-xs text-slate-400 mb-1.5">Habilidades y tecnologías</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {app.skills.split(",").map((s) => s.trim()).filter(Boolean).map((skill) => (
+                      <span key={skill} className="inline-block bg-blue-50 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full border border-blue-100">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Cover letter */}
           {app.coverLetter && (
             <div>

@@ -38,6 +38,8 @@ export default async function SearchPage({
     lastName: string;
     email: string;
     phone: string | null;
+    city: string | null;
+    skills: string | null;
     coverLetter: string | null;
     notes: string | null;
     status: string;
@@ -61,6 +63,8 @@ export default async function SearchPage({
       { firstName: { contains: term } },
       { lastName: { contains: term } },
       { email: { contains: term } },
+      { city: { contains: term } },
+      { skills: { contains: term } },
       { coverLetter: { contains: term } },
       { notes: { contains: term } },
       { job: { title: { contains: term } } },
@@ -70,7 +74,12 @@ export default async function SearchPage({
     if (type === "all" || type === "applications") {
       applications = await prisma.application.findMany({
         where: { OR: orConditions },
-        include: { job: { select: { id: true, title: true, department: true } } },
+        select: {
+          id: true, firstName: true, lastName: true, email: true,
+          phone: true, city: true, skills: true, coverLetter: true,
+          notes: true, status: true, createdAt: true,
+          job: { select: { id: true, title: true, department: true } },
+        },
         orderBy: { createdAt: "desc" },
         take: 30,
       });
@@ -200,6 +209,8 @@ export default async function SearchPage({
                 const emailHl = highlight(app.email, terms);
                 const jobHl = highlight(app.job.title, terms);
                 const deptHl = highlight(app.job.department, terms);
+                const cityHl = app.city ? highlight(app.city, terms) : null;
+                const skillsHl = app.skills ? highlight(app.skills.slice(0, 120), terms) : null;
                 const snippet = app.coverLetter
                   ? highlight(app.coverLetter.slice(0, 180), terms)
                   : app.notes
@@ -223,7 +234,14 @@ export default async function SearchPage({
                         <div className="flex flex-wrap gap-3 text-xs text-slate-500 mb-2">
                           <span dangerouslySetInnerHTML={{ __html: `✉️ ${emailHl}` }} />
                           {app.phone && <span>📱 {app.phone}</span>}
+                          {cityHl && <span dangerouslySetInnerHTML={{ __html: `📍 ${cityHl}` }} />}
                         </div>
+                        {skillsHl && (
+                          <p
+                            className="text-xs text-slate-500 bg-slate-50 rounded px-2 py-1 mb-2 leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: `🛠 ${skillsHl}` }}
+                          />
+                        )}
                         <div className="flex flex-wrap gap-2 mb-2">
                           <span
                             className="inline-block bg-blue-50 text-blue-600 text-xs font-semibold px-2 py-0.5 rounded"
