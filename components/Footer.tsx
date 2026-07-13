@@ -12,12 +12,17 @@ export default function Footer() {
             <span className="font-semibold text-white">DB Consulting</span>
           </div>
           <p className="text-sm text-slate-400">
-            © {new Date().getFullYear()} DB Consulting. Todos los derechos reservados.
+            DB Consulting
           </p>
-          <p className="text-xs text-slate-600">
-            Desarrollado con ♥ por{" "}
-            <span className="text-slate-400 font-semibold">{developer}</span>
-          </p>
+          <div className="text-right">
+            <p className="text-xs text-slate-600">
+              Desarrollado por{" "}
+              <span className="text-slate-400 font-semibold">Federico Lopez</span>
+            </p>
+            <p className="text-xs text-slate-700 mt-0.5">
+              © {new Date().getFullYear()} {developer} · Todos los derechos reservados.
+            </p>
+          </div>
         </div>
       </div>
     </footer>
