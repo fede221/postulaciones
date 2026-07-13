@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { extractCvText } from "@/lib/extractCvText";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
@@ -59,6 +60,12 @@ export async function POST(req: NextRequest) {
       cvPath = `/uploads/cvs/${filename}`;
     }
 
+    // Extract text from CV for search and matching (best-effort, non-blocking)
+    let cvText: string | null = null;
+    if (cvPath) {
+      cvText = await extractCvText(cvPath);
+    }
+
     const application = await prisma.application.create({
       data: {
         jobId,
@@ -74,6 +81,7 @@ export async function POST(req: NextRequest) {
         availability: availability || null,
         salaryExpectation: salaryExpectation || null,
         skills: skills || null,
+        cvText: cvText || null,
         coverLetter: coverLetter || null,
         cvPath,
       },

@@ -65,6 +65,7 @@ export default async function SearchPage({
       { email: { contains: term } },
       { city: { contains: term } },
       { skills: { contains: term } },
+      { cvText: { contains: term } },
       { coverLetter: { contains: term } },
       { notes: { contains: term } },
       { job: { title: { contains: term } } },

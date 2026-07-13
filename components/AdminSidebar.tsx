@@ -8,6 +8,7 @@ const navItems = [
   { href: "/admin/jobs", label: "Puestos", icon: "💼" },
   { href: "/admin/applications", label: "Postulaciones", icon: "📋" },
   { href: "/admin/applicants", label: "Postulantes", icon: "👤" },
+  { href: "/admin/candidates", label: "Matching CV", icon: "🎯" },
   { href: "/admin/search", label: "Búsqueda", icon: "🔍" },
 ];
 

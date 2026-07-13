@@ -1,0 +1,1 @@
+ALTER TABLE `Application` ADD COLUMN `cvText` LONGTEXT NULL;
