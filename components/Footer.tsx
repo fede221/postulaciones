@@ -1,5 +1,5 @@
 export default function Footer() {
-  const developer = process.env.NEXT_PUBLIC_DEVELOPER ?? "Tu Desarrolladora";
+  const developer = process.env.NEXT_PUBLIC_DEVELOPER ?? "Absolute Zero";
 
   return (
     <footer className="bg-slate-800 text-slate-300 py-10 mt-auto">

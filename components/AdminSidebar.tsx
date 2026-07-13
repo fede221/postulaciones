@@ -69,7 +69,7 @@ export default function AdminSidebar() {
         <div className="mt-4 pt-4 border-t border-slate-800 text-center">
           <p className="text-slate-600 text-xs">Desarrollado por</p>
           <p className="text-slate-400 text-xs font-semibold mt-0.5">
-            {process.env.NEXT_PUBLIC_DEVELOPER ?? "Tu Desarrolladora"}
+            {process.env.NEXT_PUBLIC_DEVELOPER ?? "Absolute Zero"}
           </p>
         </div>
       </div>
