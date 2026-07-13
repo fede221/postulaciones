@@ -4,9 +4,11 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 const navItems = [
+  { href: "/admin/dashboard", label: "Dashboard", icon: "📊" },
   { href: "/admin/jobs", label: "Puestos", icon: "💼" },
   { href: "/admin/applications", label: "Postulaciones", icon: "📋" },
   { href: "/admin/applicants", label: "Postulantes", icon: "👤" },
+  { href: "/admin/search", label: "Búsqueda", icon: "🔍" },
 ];
 
 export default function AdminSidebar() {
@@ -29,7 +31,7 @@ export default function AdminSidebar() {
       <nav className="flex-1 p-4">
         <ul className="space-y-1">
           {navItems.map((item) => {
-            const active = pathname.startsWith(item.href);
+            const active = pathname === item.href || (item.href !== "/admin/dashboard" && pathname.startsWith(item.href));
             return (
               <li key={item.href}>
                 <Link
@@ -63,6 +65,12 @@ export default function AdminSidebar() {
         >
           <span>🚪</span> Cerrar sesión
         </button>
+        <div className="mt-4 pt-4 border-t border-slate-800 text-center">
+          <p className="text-slate-600 text-xs">Desarrollado por</p>
+          <p className="text-slate-400 text-xs font-semibold mt-0.5">
+            {process.env.NEXT_PUBLIC_DEVELOPER ?? "Tu Desarrolladora"}
+          </p>
+        </div>
       </div>
     </aside>
   );
