@@ -176,7 +176,7 @@ export default function ApplyForm({ jobId }: { jobId: string }) {
               name="skills"
               rows={3}
               className={`${inputClass} resize-none`}
-              placeholder="Ej: Excel, Power BI, Python, Gestión de proyectos, SAP, Photoshop..."
+              placeholder="Ej: Excel, SAP, Manipulación de alimentos, HACCP, Montacargas, Frío, Conducción, Torno, Liquidación de sueldos..."
             />
             <p className="text-xs text-slate-400 mt-1">
               Incluí herramientas, lenguajes, certificaciones o cualquier habilidad relevante.

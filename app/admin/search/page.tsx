@@ -181,7 +181,7 @@ export default async function SearchPage({
               Podés buscar por nombre, email, área, puesto, palabras en la carta de presentación o notas internas.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-2">
-              {["desarrollador", "marketing", "senior", "rrhh", "diseño", "data", "remoto"].map((s) => (
+              {["gastronomia", "desposte", "calidad", "logistica", "mantenimiento", "rrhh", "sistemas", "comercial", "tesoreria", "seguridad", "controlling", "taller"].map((s) => (
                 <a
                   key={s}
                   href={`/admin/search?q=${s}`}

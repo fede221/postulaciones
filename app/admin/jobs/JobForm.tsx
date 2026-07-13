@@ -2,6 +2,28 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+const DEPARTMENTS = [
+  "Gastronomía",
+  "Operaciones - Cocido",
+  "Operaciones - Crudo",
+  "Planta de Desposte",
+  "Calidad",
+  "Seguridad e Higiene",
+  "Mantenimiento",
+  "Logística",
+  "Taller Mecánico",
+  "Sistemas",
+  "Control de Gestión",
+  "Pago a Proveedores",
+  "Tesorería",
+  "Contabilidad",
+  "RRHH",
+  "Comercial",
+  "Administración",
+  "Legal",
+  "Otro",
+];
+
 interface JobData {
   id?: string;
   title?: string;
@@ -67,7 +89,17 @@ export default function JobForm({ job }: { job?: JobData }) {
 
         <div>
           <label className="block text-sm font-semibold text-slate-600 mb-1">Área / Departamento *</label>
-          <input name="department" required defaultValue={job?.department} className={inputClass} placeholder="Ej: Tecnología" />
+          <select
+            name="department"
+            required
+            defaultValue={job?.department ?? ""}
+            className={inputClass}
+          >
+            <option value="" disabled>Seleccioná un área...</option>
+            {DEPARTMENTS.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
         </div>
 
         <div>
