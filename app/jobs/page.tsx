@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Puestos disponibles | Mi Empresa",
+  title: "Puestos disponibles | DB Consulting",
 };
 
 export default async function JobsPage({

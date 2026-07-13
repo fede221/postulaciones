@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Trabaja con Nosotros | Mi Empresa",
-  description: "Descubrí las oportunidades laborales disponibles en Mi Empresa y postulate hoy.",
+  title: "Trabaja con Nosotros | DB Consulting",
+  description: "Descubrí las oportunidades laborales disponibles en DB Consulting y postulate hoy.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

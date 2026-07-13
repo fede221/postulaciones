@@ -22,7 +22,7 @@ export default function AdminSidebar() {
             ME
           </div>
           <div>
-            <p className="font-bold text-sm">Mi Empresa</p>
+            <p className="font-bold text-sm">DB Consulting</p>
             <p className="text-slate-400 text-xs">Panel Admin</p>
           </div>
         </div>

@@ -123,7 +123,7 @@ export default function ApplyForm({ jobId }: { jobId: string }) {
         </h2>
         <div>
           <label className="block text-sm font-semibold text-slate-600 mb-1">
-            ¿Por qué querés trabajar en Mi Empresa? <span className="text-slate-400 font-normal">(opcional)</span>
+            ¿Por qué querés trabajar en DB Consulting? <span className="text-slate-400 font-normal">(opcional)</span>
           </label>
           <textarea
             name="coverLetter"

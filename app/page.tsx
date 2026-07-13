@@ -36,7 +36,7 @@ export default async function Home() {
             Construí tu carrera<br />con nosotros
           </h1>
           <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-            En Mi Empresa creemos que las personas son lo más importante. Buscamos talentos apasionados que quieran hacer la diferencia.
+            En DB Consulting creemos que las personas son lo más importante. Buscamos talentos apasionados que quieran hacer la diferencia.
           </p>
           <Link
             href="/jobs"

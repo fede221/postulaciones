@@ -9,10 +9,10 @@ export default function Footer() {
             <div className="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xs">ME</span>
             </div>
-            <span className="font-semibold text-white">Mi Empresa</span>
+            <span className="font-semibold text-white">DB Consulting</span>
           </div>
           <p className="text-sm text-slate-400">
-            © {new Date().getFullYear()} Mi Empresa. Todos los derechos reservados.
+            © {new Date().getFullYear()} DB Consulting. Todos los derechos reservados.
           </p>
           <p className="text-xs text-slate-600">
             Desarrollado con ♥ por{" "}
