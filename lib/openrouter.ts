@@ -1,6 +1,5 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-// Free model with good instruction following and JSON output
-const DEFAULT_MODEL = "meta-llama/llama-3.1-8b-instruct:free";
+const DEFAULT_MODEL = "deepseek/deepseek-chat-v3-5:free";
 
 export interface AiProfile {
   summary: string;
