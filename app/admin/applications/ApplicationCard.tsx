@@ -33,6 +33,7 @@ interface App {
   availability: string | null;
   salaryExpectation: string | null;
   skills: string | null;
+  cvText: string | null;
   coverLetter: string | null;
   cvPath: string | null;
   status: string;
@@ -199,6 +200,23 @@ export default function ApplicationCard({ app }: { app: App }) {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* CV text extracted */}
+          {app.cvText && (
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+                Texto extraído del CV
+                <span className="ml-2 font-normal normal-case text-slate-300">
+                  ({app.cvText.length.toLocaleString()} caracteres)
+                </span>
+              </p>
+              <div className="bg-white rounded-xl border border-slate-100 p-4 max-h-48 overflow-y-auto">
+                <pre className="text-xs text-slate-600 whitespace-pre-wrap font-mono leading-relaxed">
+                  {app.cvText}
+                </pre>
+              </div>
             </div>
           )}
 

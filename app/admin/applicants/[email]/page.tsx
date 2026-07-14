@@ -102,25 +102,91 @@ export default async function ApplicantDetailPage({
 
               <div className="px-6 py-4 space-y-5">
                 {/* Application info */}
-                <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Fecha de postulación</p>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Fecha</p>
                     <p className="text-slate-700">{app.createdAt.toLocaleDateString("es-AR")} · {app.createdAt.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}</p>
                   </div>
+                  {(app as { city?: string | null }).city && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Ciudad</p>
+                      <p className="text-slate-700">📍 {(app as { city?: string | null }).city}</p>
+                    </div>
+                  )}
+                  {(app as { yearsExperience?: number | null }).yearsExperience != null && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Experiencia</p>
+                      <p className="text-slate-700">{(app as { yearsExperience?: number | null }).yearsExperience === 0 ? "Sin experiencia" : `${(app as { yearsExperience?: number | null }).yearsExperience} años`}</p>
+                    </div>
+                  )}
+                  {(app as { availability?: string | null }).availability && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Disponibilidad</p>
+                      <p className="text-slate-700">{((app as { availability?: string | null }).availability ?? "").replace(/_/g, " ")}</p>
+                    </div>
+                  )}
+                  {(app as { workMode?: string | null }).workMode && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Modalidad</p>
+                      <p className="text-slate-700 capitalize">{(app as { workMode?: string | null }).workMode}</p>
+                    </div>
+                  )}
+                  {(app as { salaryExpectation?: string | null }).salaryExpectation && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Pretensión salarial</p>
+                      <p className="text-slate-700">{(app as { salaryExpectation?: string | null }).salaryExpectation}</p>
+                    </div>
+                  )}
                   {app.cvPath && (
                     <div>
                       <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">CV adjunto</p>
-                      <a
-                        href={app.cvPath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium"
-                      >
+                      <a href={app.cvPath} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium">
                         📄 Descargar CV
                       </a>
                     </div>
                   )}
+                  {(app as { linkedinUrl?: string | null }).linkedinUrl && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">LinkedIn</p>
+                      <a href={(app as { linkedinUrl?: string | null }).linkedinUrl!} target="_blank" rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline font-medium text-sm">
+                        Ver perfil ↗
+                      </a>
+                    </div>
+                  )}
                 </div>
+
+                {/* Skills */}
+                {(app as { skills?: string | null }).skills && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Habilidades y tecnologías</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {((app as { skills?: string | null }).skills ?? "").split(",").map((s) => s.trim()).filter(Boolean).map((skill) => (
+                        <span key={skill} className="bg-blue-50 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full border border-blue-100">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* CV text extracted */}
+                {(app as { cvText?: string | null }).cvText && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+                      Texto extraído del CV
+                      <span className="ml-2 font-normal normal-case text-slate-300">
+                        ({((app as { cvText?: string | null }).cvText ?? "").length.toLocaleString()} caracteres)
+                      </span>
+                    </p>
+                    <div className="bg-slate-50 rounded-xl border border-slate-100 p-4 max-h-64 overflow-y-auto">
+                      <pre className="text-xs text-slate-600 whitespace-pre-wrap font-mono leading-relaxed">
+                        {(app as { cvText?: string | null }).cvText}
+                      </pre>
+                    </div>
+                  </div>
+                )}
 
                 {/* Cover letter */}
                 {app.coverLetter && (
