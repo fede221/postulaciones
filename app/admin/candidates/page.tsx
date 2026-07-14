@@ -53,6 +53,7 @@ export default async function CandidatesPage({
       availability: true,
       salaryExpectation: true,
       skills: true,
+      aiProfile: true,
       cvText: true,
       coverLetter: true,
       status: true,
@@ -80,11 +81,21 @@ export default async function CandidatesPage({
 
   const departments = [...new Set(allApplications.map((a) => a.job.department))].sort();
 
-  // Skill frequency matrix
+  // Skill frequency matrix — merge manual skills + AI-extracted skills
   const skillMap = new Map<string, number>();
   for (const app of allApplications) {
-    if (!app.skills) continue;
-    app.skills.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean).forEach((skill) => {
+    const manualSkills = app.skills
+      ? app.skills.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)
+      : [];
+    let aiSkills: string[] = [];
+    if (app.aiProfile) {
+      try {
+        const parsed = JSON.parse(app.aiProfile) as { skills?: string[] };
+        aiSkills = (parsed.skills ?? []).map((s) => s.trim().toLowerCase()).filter(Boolean);
+      } catch { /* ignore malformed JSON */ }
+    }
+    const combined = [...new Set([...manualSkills, ...aiSkills])];
+    combined.forEach((skill) => {
       skillMap.set(skill, (skillMap.get(skill) ?? 0) + 1);
     });
   }
@@ -230,7 +241,7 @@ export default async function CandidatesPage({
                           <span className="bg-blue-50 text-blue-600 text-xs font-semibold px-2 py-0.5 rounded">
                             {app.job.department} · {app.job.title}
                           </span>
-                          <span className="text-xs text-slate-400">{new Date(app.createdAt).toLocaleDateString("es-AR")}</span>
+                          <span className="text-xs text-slate-400">{`${String(new Date(app.createdAt).getDate()).padStart(2,"0")}/${String(new Date(app.createdAt).getMonth()+1).padStart(2,"0")}/${new Date(app.createdAt).getFullYear()}`}</span>
                         </div>
 
                         {/* Skills chips */}
@@ -281,7 +292,7 @@ export default async function CandidatesPage({
         {topSkills.length > 0 && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6">
             <h2 className="text-lg font-bold text-slate-700 mb-1">Matriz de habilidades</h2>
-            <p className="text-xs text-slate-400 mb-5">Top 30 habilidades declaradas por los candidatos. Hacé clic para buscar.</p>
+            <p className="text-xs text-slate-400 mb-5">Top 30 habilidades (declaradas + extraídas por IA). Hacé clic para buscar.</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
               {topSkills.map(([skill, count]) => (
                 <a
