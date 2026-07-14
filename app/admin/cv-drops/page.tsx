@@ -13,6 +13,14 @@ export default async function CvDropsPage() {
 
   const drops = await prisma.cvDrop.findMany({
     orderBy: { createdAt: "desc" },
+    select: {
+      id: true, firstName: true, lastName: true, email: true,
+      phone: true, city: true, linkedinUrl: true,
+      yearsExperience: true, educationLevel: true, workMode: true,
+      availability: true, salaryExpectation: true,
+      skills: true, coverLetter: true, cvPath: true, cvText: true,
+      aiSummary: true, aiProfile: true, reviewed: true, createdAt: true,
+    },
   });
 
   const unreviewed = drops.filter((d) => !d.reviewed).length;

@@ -1,0 +1,3 @@
+ALTER TABLE `CvDrop`
+  ADD COLUMN `aiSummary` TEXT NULL,
+  ADD COLUMN `aiProfile` TEXT NULL;

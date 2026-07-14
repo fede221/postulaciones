@@ -2,6 +2,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+interface ParsedAiProfile {
+  skills?: string[];
+  previousRoles?: string[];
+  previousCompanies?: string[];
+  languages?: string[];
+  highlights?: string[];
+  suggestedDepartment?: string | null;
+  departmentConfidence?: "alta" | "media" | "baja" | null;
+}
+
 interface Drop {
   id: string;
   firstName: string;
@@ -19,6 +29,8 @@ interface Drop {
   coverLetter: string | null;
   cvPath: string | null;
   cvText: string | null;
+  aiSummary: string | null;
+  aiProfile: string | null;
   reviewed: boolean;
   createdAt: Date;
 }
@@ -55,6 +67,27 @@ export default function CvDropCard({ drop }: { drop: Drop }) {
   const [reviewed, setReviewed] = useState(drop.reviewed);
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [aiSummary, setAiSummary] = useState(drop.aiSummary || "");
+  const [aiProfile, setAiProfile] = useState<ParsedAiProfile | null>(
+    drop.aiProfile ? (JSON.parse(drop.aiProfile) as ParsedAiProfile) : null
+  );
+
+  async function analyzeWithAI() {
+    setAnalyzing(true);
+    const res = await fetch(`/api/admin/cv-drops/${drop.id}/analyze`, { method: "POST" });
+    if (res.ok) {
+      const data = await res.json() as { summary: string; profile: ParsedAiProfile };
+      setAiSummary(data.summary);
+      setAiProfile(data.profile);
+      setExpanded(true);
+      router.refresh();
+    } else {
+      const err = await res.json() as { error?: string };
+      alert(err.error ?? "Error al analizar");
+    }
+    setAnalyzing(false);
+  }
 
   async function toggleReviewed() {
     setLoading(true);
@@ -112,6 +145,19 @@ export default function CvDropCard({ drop }: { drop: Drop }) {
               📄 Ver CV
             </a>
           )}
+          {(drop.cvText || drop.coverLetter) && (
+            <button
+              onClick={analyzeWithAI}
+              disabled={analyzing}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-60 ${
+                aiSummary
+                  ? "bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100"
+                  : "bg-violet-600 text-white hover:bg-violet-700"
+              }`}
+            >
+              {analyzing ? "Analizando..." : aiSummary ? "✨ Re-analizar" : "✨ Analizar con IA"}
+            </button>
+          )}
           <button
             onClick={toggleReviewed}
             disabled={loading}
@@ -137,6 +183,71 @@ export default function CvDropCard({ drop }: { drop: Drop }) {
       {/* Expanded */}
       {expanded && (
         <div className="border-t border-slate-100 px-5 py-5 space-y-5 bg-slate-50">
+
+          {/* AI analysis */}
+          {aiSummary && (
+            <div className="bg-violet-50 border border-violet-100 rounded-xl p-4">
+              <p className="text-xs font-semibold text-violet-400 uppercase tracking-wide mb-2">✨ Análisis IA</p>
+              <p className="text-sm text-violet-900 leading-relaxed font-medium mb-3">{aiSummary}</p>
+              {aiProfile && (
+                <div className="space-y-2">
+                  {aiProfile.suggestedDepartment && (
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-semibold text-violet-500">Área sugerida:</span>
+                      <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                        aiProfile.departmentConfidence === "alta"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : aiProfile.departmentConfidence === "media"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-slate-100 text-slate-600"
+                      }`}>
+                        🏢 {aiProfile.suggestedDepartment}
+                        {aiProfile.departmentConfidence && (
+                          <span className="font-normal opacity-70">· {aiProfile.departmentConfidence}</span>
+                        )}
+                      </span>
+                    </div>
+                  )}
+                  {aiProfile.highlights && aiProfile.highlights.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {aiProfile.highlights.map((h) => (
+                        <span key={h} className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-medium">
+                          ⭐ {h}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {aiProfile.previousRoles && aiProfile.previousRoles.length > 0 && (
+                    <p className="text-xs text-violet-600">
+                      <span className="font-semibold">Roles anteriores:</span>{" "}
+                      {aiProfile.previousRoles.join(" · ")}
+                    </p>
+                  )}
+                  {aiProfile.previousCompanies && aiProfile.previousCompanies.length > 0 && (
+                    <p className="text-xs text-violet-600">
+                      <span className="font-semibold">Empresas:</span>{" "}
+                      {aiProfile.previousCompanies.join(" · ")}
+                    </p>
+                  )}
+                  {aiProfile.languages && aiProfile.languages.length > 0 && (
+                    <p className="text-xs text-violet-600">
+                      <span className="font-semibold">Idiomas:</span>{" "}
+                      {aiProfile.languages.join(", ")}
+                    </p>
+                  )}
+                  {aiProfile.skills && aiProfile.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {aiProfile.skills.map((s) => (
+                        <span key={s} className="text-xs bg-white text-violet-600 border border-violet-200 px-2 py-0.5 rounded-full">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Professional profile */}
           {hasProfile && (

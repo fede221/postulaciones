@@ -75,6 +75,8 @@ model CvDrop {
   coverLetter       String?  @db.Text
   cvPath            String?
   cvText            String?  @db.LongText
+  aiSummary         String?  @db.Text
+  aiProfile         String?  @db.Text
   reviewed          Boolean  @default(false)
   createdAt         DateTime @default(now())
 }
