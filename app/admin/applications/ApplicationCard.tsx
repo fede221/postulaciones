@@ -53,6 +53,16 @@ interface ParsedAiProfile {
   highlights?: string[];
 }
 
+function formatDateTime(date: Date | string) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${day}/${month}/${year} · ${hours}:${minutes}`;
+}
+
 export default function ApplicationCard({ app }: { app: App }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
@@ -125,8 +135,7 @@ export default function ApplicationCard({ app }: { app: App }) {
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <StatusBadge status={status} />
             <span className="text-xs text-slate-400">
-              {new Date(app.createdAt).toLocaleDateString("es-AR")} ·{" "}
-              {new Date(app.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+              {formatDateTime(app.createdAt)}
             </span>
           </div>
 
@@ -391,8 +400,7 @@ export default function ApplicationCard({ app }: { app: App }) {
                         <StatusBadge status={h.toStatus} />
                       </div>
                       <span className="text-xs text-slate-400">
-                        {new Date(h.createdAt).toLocaleDateString("es-AR")} ·{" "}
-                        {new Date(h.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+                        {formatDateTime(h.createdAt)}
                       </span>
                     </div>
                     {h.note && (
