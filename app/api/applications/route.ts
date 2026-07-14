@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Tipo de archivo no permitido. Usá PDF, DOC o DOCX." }, { status: 400 });
       }
 
-      const uploadsDir = path.join(process.cwd(), "uploads", "cvs");
+      const uploadsDir = path.join(process.cwd(), "public", "uploads", "cvs");
       await mkdir(uploadsDir, { recursive: true });
 
       const ext = path.extname(cv.name);

@@ -3,7 +3,7 @@ import path from "path";
 
 export async function extractCvText(cvPath: string): Promise<string | null> {
   try {
-    const fullPath = path.join(process.cwd(), cvPath.replace(/^\//, ""));
+    const fullPath = path.join(process.cwd(), "public", cvPath.replace(/^\//, ""));
     const buffer = await readFile(fullPath);
     const ext = path.extname(cvPath).toLowerCase();
 
