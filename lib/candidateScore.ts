@@ -14,11 +14,13 @@ export interface ScoredCandidate {
   availability: string | null;
   salaryExpectation: string | null;
   skills: string | null;
+  aiProfile: string | null;
   cvText: string | null;
   coverLetter: string | null;
   status: string;
   createdAt: Date;
   job: { id: string; title: string; department: string };
+  source: "application" | "drop";
   score: number;
   matchedTerms: string[];
 }

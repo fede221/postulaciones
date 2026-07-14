@@ -38,39 +38,58 @@ export default async function CandidatesPage({
   const { q, dept, exp, edu } = await searchParams;
   const query = q?.trim() ?? "";
 
-  const allApplications = await prisma.application.findMany({
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      email: true,
-      city: true,
-      phone: true,
-      linkedinUrl: true,
-      yearsExperience: true,
-      educationLevel: true,
-      workMode: true,
-      availability: true,
-      salaryExpectation: true,
-      skills: true,
-      aiProfile: true,
-      cvText: true,
-      coverLetter: true,
-      status: true,
-      createdAt: true,
-      job: { select: { id: true, title: true, department: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [rawApplications, rawDrops] = await Promise.all([
+    prisma.application.findMany({
+      select: {
+        id: true, firstName: true, lastName: true, email: true,
+        city: true, phone: true, linkedinUrl: true,
+        yearsExperience: true, educationLevel: true, workMode: true,
+        availability: true, salaryExpectation: true,
+        skills: true, aiProfile: true, cvText: true, coverLetter: true,
+        status: true, createdAt: true,
+        job: { select: { id: true, title: true, department: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.cvDrop.findMany({
+      select: {
+        id: true, firstName: true, lastName: true, email: true,
+        city: true, phone: true, linkedinUrl: true,
+        yearsExperience: true, educationLevel: true, workMode: true,
+        availability: true, salaryExpectation: true,
+        skills: true, aiProfile: true, cvText: true, coverLetter: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  // Normalize drops to the same shape as applications
+  const normalizedDrops = rawDrops.map((d) => ({
+    ...d,
+    status: "spontaneous" as const,
+    job: { id: "", title: "Postulación espontánea", department: "Espontáneo" },
+    source: "drop" as const,
+  }));
+
+  const normalizedApplications = rawApplications.map((a) => ({
+    ...a,
+    source: "application" as const,
+  }));
+
+  const allApplications = [
+    ...normalizedApplications,
+    ...normalizedDrops,
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   // Stats
   const totalWithCv = allApplications.filter((a) => a.cvText).length;
   const totalWithSkills = allApplications.filter((a) => a.skills).length;
   const totalPending = allApplications.filter((a) => a.cvText === null && (a as { cvPath?: string | null }).cvPath !== null).length;
 
-  // Filter pipeline
+  // Filter pipeline — dept filter applies only to applications (drops have synthetic department)
   let filtered = allApplications as typeof allApplications;
-  if (dept) filtered = filtered.filter((a) => a.job.department === dept);
+  if (dept) filtered = filtered.filter((a) => a.source === "application" && a.job.department === dept);
   if (exp) filtered = filtered.filter((a) => a.yearsExperience != null && a.yearsExperience >= parseInt(exp));
   if (edu) filtered = filtered.filter((a) => a.educationLevel === edu);
 
@@ -79,7 +98,7 @@ export default async function CandidatesPage({
     ? rankCandidates(filtered, query)
     : filtered.map((c) => ({ ...c, score: 0, matchedTerms: [] as string[] }));
 
-  const departments = [...new Set(allApplications.map((a) => a.job.department))].sort();
+  const departments = [...new Set(rawApplications.map((a) => a.job.department))].sort();
 
   // Skill frequency matrix — merge manual skills + AI-extracted skills
   const skillMap = new Map<string, number>();
@@ -115,7 +134,10 @@ export default async function CandidatesPage({
             </p>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-slate-500">{totalWithCv} CVs parseados · {totalWithSkills} con habilidades</span>
+            <span className="text-slate-500">
+              {totalWithCv} CVs parseados · {totalWithSkills} con habilidades
+              {rawDrops.length > 0 && ` · ${rawDrops.length} espontáneo${rawDrops.length !== 1 ? "s" : ""}`}
+            </span>
             <ExtractAllButton />
           </div>
         </div>
@@ -219,7 +241,10 @@ export default async function CandidatesPage({
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
                           <h3 className="font-bold text-slate-800">{app.firstName} {app.lastName}</h3>
-                          <StatusBadge status={app.status} />
+                          {app.source === "drop"
+                            ? <span className="text-xs bg-indigo-100 text-indigo-700 font-semibold px-2 py-0.5 rounded-full">Espontáneo</span>
+                            : <StatusBadge status={app.status} />
+                          }
                           {app.cvText && (
                             <span className="text-xs bg-green-50 text-green-700 border border-green-100 px-2 py-0.5 rounded-full">
                               CV parseado
@@ -255,9 +280,11 @@ export default async function CandidatesPage({
                         </div>
 
                         <div className="flex flex-wrap gap-1.5 mb-2">
-                          <span className="bg-blue-50 text-blue-600 text-xs font-semibold px-2 py-0.5 rounded">
-                            {app.job.department} · {app.job.title}
-                          </span>
+                          {app.source === "application" && (
+                            <span className="bg-blue-50 text-blue-600 text-xs font-semibold px-2 py-0.5 rounded">
+                              {app.job.department} · {app.job.title}
+                            </span>
+                          )}
                           <span className="text-xs text-slate-400">{`${String(new Date(app.createdAt).getDate()).padStart(2,"0")}/${String(new Date(app.createdAt).getMonth()+1).padStart(2,"0")}/${new Date(app.createdAt).getFullYear()}`}</span>
                         </div>
 
@@ -288,12 +315,16 @@ export default async function CandidatesPage({
                       </div>
 
                       <div className="flex gap-2 shrink-0">
-                        <Link href={`/admin/applicants/${encodeURIComponent(app.email)}`}
-                          className="px-3 py-1.5 text-xs font-semibold border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50">
-                          Historial
-                        </Link>
-                        <Link href={`/admin/applications?jobId=${app.job.id}`}
-                          className="px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        {app.source === "application" && (
+                          <Link href={`/admin/applicants/${encodeURIComponent(app.email)}`}
+                            className="px-3 py-1.5 text-xs font-semibold border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50">
+                            Historial
+                          </Link>
+                        )}
+                        <Link
+                          href={app.source === "drop" ? "/admin/cv-drops" : `/admin/applications?jobId=${app.job.id}`}
+                          className="px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
                           Ver →
                         </Link>
                       </div>
