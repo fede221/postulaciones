@@ -12,6 +12,40 @@ export interface AiProfile {
   highlights: string[];
 }
 
+// Tries to parse JSON that may be truncated mid-stream
+function safeParseJson(raw: string): AiProfile | null {
+  // Strip markdown fences
+  let str = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
+
+  // Try as-is first
+  try { return JSON.parse(str) as AiProfile; } catch { /* continue */ }
+
+  // Find the last complete key-value pair and close the object
+  // Strategy: truncate at the last comma or closing bracket we can find
+  // then close open arrays/objects
+  const openBraces: string[] = [];
+  let inString = false;
+  let lastSafePos = 0;
+
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (ch === '"' && str[i - 1] !== "\\") inString = !inString;
+    if (inString) continue;
+    if (ch === "{" || ch === "[") openBraces.push(ch === "{" ? "}" : "]");
+    if (ch === "}" || ch === "]") {
+      openBraces.pop();
+      if (openBraces.length === 1) lastSafePos = i + 1; // inside root object
+    }
+  }
+
+  if (lastSafePos > 0) {
+    const repaired = str.slice(0, lastSafePos) + openBraces.reverse().join("") + "}";
+    try { return JSON.parse(repaired) as AiProfile; } catch { /* continue */ }
+  }
+
+  return null;
+}
+
 export async function analyzeCvWithAI(
   cvText: string,
   jobTitle: string,
@@ -23,26 +57,16 @@ export async function analyzeCvWithAI(
     return null;
   }
 
-  const prompt = `Sos un asistente de RRHH. Analizá el siguiente CV y respondé SOLO con un JSON válido, sin texto adicional ni markdown.
+  // Keep prompt concise so the response fits within token limits
+  const prompt = `Sos un asistente de RRHH. Analizá el CV y respondé ÚNICAMENTE con JSON válido, sin texto extra.
 
-El candidato se postuló para el puesto: "${jobTitle}" (departamento: ${jobDepartment}).
+Puesto: "${jobTitle}" | Departamento: ${jobDepartment}
 
 CV:
----
-${cvText.slice(0, 6000)}
----
+${cvText.slice(0, 4000)}
 
-Respondé con este JSON exacto:
-{
-  "summary": "Resumen ejecutivo del candidato en 2-3 oraciones en español, enfocado en su relevancia para el puesto",
-  "skills": ["lista", "de", "habilidades", "técnicas", "y", "blandas", "detectadas"],
-  "yearsExperience": número_total_de_años_de_experiencia_o_null,
-  "educationLevel": "uno de: secundario | terciario | universitario_cursando | universitario | posgrado | doctorado | null",
-  "previousRoles": ["cargo anterior 1", "cargo anterior 2"],
-  "previousCompanies": ["empresa 1", "empresa 2"],
-  "languages": ["Español", "Inglés"],
-  "highlights": ["punto fuerte 1", "punto fuerte 2", "punto fuerte 3"]
-}`;
+Respondé con exactamente este JSON (sin markdown, sin explicaciones):
+{"summary":"resumen en 2 oraciones","skills":["skill1","skill2"],"yearsExperience":0,"educationLevel":"secundario","previousRoles":["rol1"],"previousCompanies":["empresa1"],"languages":["Español"],"highlights":["fortaleza1","fortaleza2"]}`;
 
   try {
     const res = await fetch(OPENROUTER_API_URL, {
@@ -56,8 +80,8 @@ Respondé con este JSON exacto:
       body: JSON.stringify({
         model: process.env.OPENROUTER_MODEL ?? DEFAULT_MODEL,
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.2,
-        max_tokens: 1000,
+        temperature: 0.1,
+        max_tokens: 2000,
       }),
     });
 
@@ -69,16 +93,28 @@ Respondé con este JSON exacto:
 
     const data = await res.json() as {
       choices?: { message?: { content?: string } }[];
+      usage?: { completion_tokens: number };
     };
+
     const content = data.choices?.[0]?.message?.content?.trim() ?? "";
+    console.log(`[openrouter] Response (${data.usage?.completion_tokens ?? "?"} tokens):`, content.slice(0, 200));
 
-    // Strip possible markdown code fences
-    const jsonStr = content.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
-    const profile = JSON.parse(jsonStr) as AiProfile;
+    const profile = safeParseJson(content);
+    if (!profile) {
+      console.error("[openrouter] Could not parse JSON from response:", content.slice(0, 500));
+      return null;
+    }
 
-    return { summary: profile.summary, profile };
+    // Ensure required fields have defaults
+    profile.skills = profile.skills ?? [];
+    profile.previousRoles = profile.previousRoles ?? [];
+    profile.previousCompanies = profile.previousCompanies ?? [];
+    profile.languages = profile.languages ?? [];
+    profile.highlights = profile.highlights ?? [];
+
+    return { summary: profile.summary ?? "", profile };
   } catch (e) {
-    console.error("[openrouter] Failed to analyze CV:", e);
+    console.error("[openrouter] Failed:", e);
     return null;
   }
 }
