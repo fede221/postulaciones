@@ -1,5 +1,5 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "deepseek/deepseek-chat-v3-5:free";
+const DEFAULT_MODEL = "mistralai/mistral-7b-instruct:free";
 
 export interface AiProfile {
   summary: string;
