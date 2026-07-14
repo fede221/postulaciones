@@ -1,6 +1,30 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free";
 
+export const COMPANY_DEPARTMENTS = [
+  "Gastronomía",
+  "Operaciones - Cocido",
+  "Operaciones - Crudo",
+  "Planta de Desposte",
+  "Calidad",
+  "Seguridad e Higiene",
+  "Mantenimiento",
+  "Logística",
+  "Taller Mecánico",
+  "Sistemas",
+  "Control de Gestión",
+  "Pago a Proveedores",
+  "Tesorería",
+  "Contabilidad",
+  "RRHH",
+  "Comercial",
+  "Administración",
+  "Legal",
+  "Otro",
+] as const;
+
+export type CompanyDepartment = (typeof COMPANY_DEPARTMENTS)[number];
+
 export interface AiProfile {
   summary: string;
   skills: string[];
@@ -10,6 +34,8 @@ export interface AiProfile {
   previousCompanies: string[];
   languages: string[];
   highlights: string[];
+  suggestedDepartment: CompanyDepartment | null;
+  departmentConfidence: "alta" | "media" | "baja" | null;
 }
 
 // Tries to parse JSON that may be truncated mid-stream
@@ -57,16 +83,23 @@ export async function analyzeCvWithAI(
     return null;
   }
 
+  const deptList = COMPANY_DEPARTMENTS.join(" | ");
+
   // Keep prompt concise so the response fits within token limits
   const prompt = `Sos un asistente de RRHH. Analizá el CV y respondé ÚNICAMENTE con JSON válido, sin texto extra.
 
-Puesto: "${jobTitle}" | Departamento: ${jobDepartment}
+Puesto postulado: "${jobTitle}" | Departamento postulado: ${jobDepartment}
+
+Departamentos de la empresa (elegí el que MEJOR se adapte al perfil real del candidato según su experiencia, independientemente del puesto al que postuló):
+${deptList}
 
 CV:
-${cvText.slice(0, 4000)}
+${cvText.slice(0, 3800)}
 
 Respondé con exactamente este JSON (sin markdown, sin explicaciones):
-{"summary":"resumen en 2 oraciones","skills":["skill1","skill2"],"yearsExperience":0,"educationLevel":"secundario","previousRoles":["rol1"],"previousCompanies":["empresa1"],"languages":["Español"],"highlights":["fortaleza1","fortaleza2"]}`;
+{"summary":"resumen en 2 oraciones","skills":["skill1","skill2"],"yearsExperience":0,"educationLevel":"secundario","previousRoles":["rol1"],"previousCompanies":["empresa1"],"languages":["Español"],"highlights":["fortaleza1","fortaleza2"],"suggestedDepartment":"Sistemas","departmentConfidence":"alta"}
+
+IMPORTANTE: suggestedDepartment debe ser exactamente uno de los departamentos listados. Si no hay suficiente info, usá "Otro" y departmentConfidence "baja".`;
 
   try {
     const res = await fetch(OPENROUTER_API_URL, {
@@ -111,6 +144,10 @@ Respondé con exactamente este JSON (sin markdown, sin explicaciones):
     profile.previousCompanies = profile.previousCompanies ?? [];
     profile.languages = profile.languages ?? [];
     profile.highlights = profile.highlights ?? [];
+    profile.suggestedDepartment = COMPANY_DEPARTMENTS.includes(profile.suggestedDepartment as CompanyDepartment)
+      ? profile.suggestedDepartment
+      : null;
+    profile.departmentConfidence = profile.departmentConfidence ?? null;
 
     return { summary: profile.summary ?? "", profile };
   } catch (e) {

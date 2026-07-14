@@ -225,6 +225,23 @@ export default async function CandidatesPage({
                               CV parseado
                             </span>
                           )}
+                          {(() => {
+                            if (!app.aiProfile) return null;
+                            try {
+                              const p = JSON.parse(app.aiProfile) as { suggestedDepartment?: string; departmentConfidence?: string };
+                              if (!p.suggestedDepartment) return null;
+                              const color = p.departmentConfidence === "alta"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                : p.departmentConfidence === "media"
+                                ? "bg-yellow-50 text-yellow-700 border-yellow-100"
+                                : "bg-slate-50 text-slate-600 border-slate-100";
+                              return (
+                                <span className={`text-xs border px-2 py-0.5 rounded-full ${color}`}>
+                                  🏢 {p.suggestedDepartment}
+                                </span>
+                              );
+                            } catch { return null; }
+                          })()}
                         </div>
 
                         <div className="flex flex-wrap gap-3 text-xs text-slate-500 mb-2">

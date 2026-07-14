@@ -51,6 +51,8 @@ interface ParsedAiProfile {
   previousCompanies?: string[];
   languages?: string[];
   highlights?: string[];
+  suggestedDepartment?: string | null;
+  departmentConfidence?: "alta" | "media" | "baja" | null;
 }
 
 function formatDateTime(date: Date | string) {
@@ -211,6 +213,23 @@ export default function ApplicationCard({ app }: { app: App }) {
               <p className="text-sm text-violet-900 leading-relaxed font-medium mb-3">{aiSummary}</p>
               {aiProfile && (
                 <div className="space-y-2">
+                  {aiProfile.suggestedDepartment && (
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-semibold text-violet-500">Área sugerida:</span>
+                      <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                        aiProfile.departmentConfidence === "alta"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : aiProfile.departmentConfidence === "media"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-slate-100 text-slate-600"
+                      }`}>
+                        🏢 {aiProfile.suggestedDepartment}
+                        {aiProfile.departmentConfidence && (
+                          <span className="font-normal opacity-70">· {aiProfile.departmentConfidence}</span>
+                        )}
+                      </span>
+                    </div>
+                  )}
                   {aiProfile.highlights && aiProfile.highlights.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {aiProfile.highlights.map((h) => (
