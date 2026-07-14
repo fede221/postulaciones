@@ -34,6 +34,8 @@ interface App {
   salaryExpectation: string | null;
   skills: string | null;
   cvText: string | null;
+  aiSummary: string | null;
+  aiProfile: string | null;
   coverLetter: string | null;
   cvPath: string | null;
   status: string;
@@ -41,6 +43,14 @@ interface App {
   createdAt: Date;
   job: { title: string; department: string };
   statusHistory: StatusHistory[];
+}
+
+interface ParsedAiProfile {
+  skills?: string[];
+  previousRoles?: string[];
+  previousCompanies?: string[];
+  languages?: string[];
+  highlights?: string[];
 }
 
 export default function ApplicationCard({ app }: { app: App }) {
@@ -51,6 +61,11 @@ export default function ApplicationCard({ app }: { app: App }) {
   const [internalNote, setInternalNote] = useState(app.notes || "");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [aiSummary, setAiSummary] = useState(app.aiSummary || "");
+  const [aiProfile, setAiProfile] = useState<ParsedAiProfile | null>(
+    app.aiProfile ? (JSON.parse(app.aiProfile) as ParsedAiProfile) : null
+  );
   const [history, setHistory] = useState<StatusHistory[]>(app.statusHistory);
 
   async function handleStatusChange(newStatus: string) {
@@ -85,6 +100,21 @@ export default function ApplicationCard({ app }: { app: App }) {
     });
     setSaving(false);
     router.refresh();
+  }
+
+  async function analyzeWithAI() {
+    setAnalyzing(true);
+    const res = await fetch(`/api/admin/applications/${app.id}/analyze`, { method: "POST" });
+    if (res.ok) {
+      const data = await res.json() as { summary: string; profile: ParsedAiProfile };
+      setAiSummary(data.summary);
+      setAiProfile(data.profile);
+      router.refresh();
+    } else {
+      const err = await res.json() as { error?: string };
+      alert(err.error ?? "Error al analizar");
+    }
+    setAnalyzing(false);
   }
 
   return (
@@ -134,6 +164,19 @@ export default function ApplicationCard({ app }: { app: App }) {
               📄 Ver CV
             </a>
           )}
+          {(app.cvText || app.coverLetter) && (
+            <button
+              onClick={analyzeWithAI}
+              disabled={analyzing}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                aiSummary
+                  ? "bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100"
+                  : "bg-violet-600 text-white hover:bg-violet-700"
+              } disabled:opacity-60`}
+            >
+              {analyzing ? "Analizando..." : aiSummary ? "✨ Re-analizar" : "✨ Analizar con IA"}
+            </button>
+          )}
           <Link
             href={`/admin/applicants/${encodeURIComponent(app.email)}`}
             className="px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors"
@@ -152,6 +195,54 @@ export default function ApplicationCard({ app }: { app: App }) {
       {/* Expanded panel */}
       {expanded && (
         <div className="border-t border-slate-100 px-5 py-5 space-y-5 bg-slate-50">
+          {/* AI analysis result */}
+          {aiSummary && (
+            <div className="bg-violet-50 border border-violet-100 rounded-xl p-4">
+              <p className="text-xs font-semibold text-violet-400 uppercase tracking-wide mb-2">✨ Análisis IA</p>
+              <p className="text-sm text-violet-900 leading-relaxed font-medium mb-3">{aiSummary}</p>
+              {aiProfile && (
+                <div className="space-y-2">
+                  {aiProfile.highlights && aiProfile.highlights.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {aiProfile.highlights.map((h) => (
+                        <span key={h} className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-medium">
+                          ⭐ {h}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {aiProfile.previousRoles && aiProfile.previousRoles.length > 0 && (
+                    <p className="text-xs text-violet-600">
+                      <span className="font-semibold">Roles anteriores:</span>{" "}
+                      {aiProfile.previousRoles.join(" · ")}
+                    </p>
+                  )}
+                  {aiProfile.previousCompanies && aiProfile.previousCompanies.length > 0 && (
+                    <p className="text-xs text-violet-600">
+                      <span className="font-semibold">Empresas:</span>{" "}
+                      {aiProfile.previousCompanies.join(" · ")}
+                    </p>
+                  )}
+                  {aiProfile.languages && aiProfile.languages.length > 0 && (
+                    <p className="text-xs text-violet-600">
+                      <span className="font-semibold">Idiomas:</span>{" "}
+                      {aiProfile.languages.join(", ")}
+                    </p>
+                  )}
+                  {aiProfile.skills && aiProfile.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {aiProfile.skills.map((s) => (
+                        <span key={s} className="text-xs bg-white text-violet-600 border border-violet-200 px-2 py-0.5 rounded-full">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Professional profile summary */}
           {(app.yearsExperience != null || app.educationLevel || app.workMode || app.availability || app.salaryExpectation || app.skills) && (
             <div>

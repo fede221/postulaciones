@@ -38,6 +38,8 @@ model Application {
   salaryExpectation String?
   skills            String?                    @db.Text
   cvText            String?                    @db.LongText
+  aiSummary         String?                    @db.Text
+  aiProfile         String?                    @db.Text
   coverLetter       String?                    @db.Text
   cvPath            String?
   status            String                     @default("pending")
