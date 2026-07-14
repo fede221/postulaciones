@@ -26,17 +26,22 @@ function KpiCard({
   colorClass,
   bgClass,
   icon,
+  href,
 }: {
   label: string;
   value: number | string;
   colorClass: string;
   bgClass: string;
   icon: string;
+  href: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 flex items-center gap-4">
+    <Link
+      href={href}
+      className="bg-white rounded-2xl border border-slate-200 p-6 flex items-center gap-4 hover:shadow-md hover:border-slate-300 transition-all group"
+    >
       <div
-        className={`w-12 h-12 ${bgClass} rounded-xl flex items-center justify-center text-2xl flex-shrink-0`}
+        className={`w-12 h-12 ${bgClass} rounded-xl flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-110 transition-transform`}
       >
         {icon}
       </div>
@@ -44,7 +49,7 @@ function KpiCard({
         <p className="text-sm text-slate-500 font-medium">{label}</p>
         <p className={`text-3xl font-extrabold ${colorClass}`}>{value}</p>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -212,6 +217,7 @@ export default async function AdminDashboardPage() {
             colorClass="text-blue-600"
             bgClass="bg-blue-50"
             icon="📋"
+            href="/admin/applications"
           />
           <KpiCard
             label="Pendientes"
@@ -219,6 +225,7 @@ export default async function AdminDashboardPage() {
             colorClass="text-yellow-600"
             bgClass="bg-yellow-50"
             icon="⏳"
+            href="/admin/applications?status=pending"
           />
           <KpiCard
             label="En revisión"
@@ -226,6 +233,7 @@ export default async function AdminDashboardPage() {
             colorClass="text-blue-600"
             bgClass="bg-blue-50"
             icon="🔍"
+            href="/admin/applications?status=reviewing"
           />
           <KpiCard
             label="Aceptados"
@@ -233,6 +241,7 @@ export default async function AdminDashboardPage() {
             colorClass="text-emerald-600"
             bgClass="bg-emerald-50"
             icon="✅"
+            href="/admin/applications?status=accepted"
           />
         </div>
 
@@ -244,6 +253,7 @@ export default async function AdminDashboardPage() {
             colorClass="text-violet-600"
             bgClass="bg-violet-50"
             icon="💼"
+            href="/admin/jobs"
           />
           <KpiCard
             label="Postulantes únicos"
@@ -251,10 +261,14 @@ export default async function AdminDashboardPage() {
             colorClass="text-indigo-600"
             bgClass="bg-indigo-50"
             icon="👤"
+            href="/admin/candidates"
           />
           {/* Acceptance rate — manual card to show the % sign */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex items-center gap-4">
-            <div className="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+          <Link
+            href="/admin/applications?status=accepted"
+            className="bg-white rounded-2xl border border-slate-200 p-6 flex items-center gap-4 hover:shadow-md hover:border-slate-300 transition-all group"
+          >
+            <div className="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-110 transition-transform">
               📈
             </div>
             <div>
@@ -265,7 +279,7 @@ export default async function AdminDashboardPage() {
                 {acceptanceRate}%
               </p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* ── Charts row ─────────────────────────────────────────────────── */}
