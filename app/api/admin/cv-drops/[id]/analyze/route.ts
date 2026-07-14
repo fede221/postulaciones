@@ -33,6 +33,7 @@ export async function POST(
   const updates: Record<string, unknown> = {
     aiSummary: result.summary,
     aiProfile: JSON.stringify(result.profile),
+    aiDepartment: result.profile.suggestedDepartment ?? null,
   };
 
   // Auto-fill profile fields only if not already set

@@ -31,6 +31,7 @@ interface Drop {
   cvText: string | null;
   aiSummary: string | null;
   aiProfile: string | null;
+  aiDepartment: string | null;
   reviewed: boolean;
   createdAt: Date;
 }
@@ -72,6 +73,7 @@ export default function CvDropCard({ drop }: { drop: Drop }) {
   const [aiProfile, setAiProfile] = useState<ParsedAiProfile | null>(
     drop.aiProfile ? (JSON.parse(drop.aiProfile) as ParsedAiProfile) : null
   );
+  const [aiDepartment, setAiDepartment] = useState(drop.aiDepartment || "");
 
   async function analyzeWithAI() {
     setAnalyzing(true);
@@ -80,6 +82,7 @@ export default function CvDropCard({ drop }: { drop: Drop }) {
       const data = await res.json() as { summary: string; profile: ParsedAiProfile };
       setAiSummary(data.summary);
       setAiProfile(data.profile);
+      setAiDepartment(data.profile.suggestedDepartment ?? "");
       setExpanded(true);
       router.refresh();
     } else {
@@ -121,6 +124,14 @@ export default function CvDropCard({ drop }: { drop: Drop }) {
           <h3 className="font-bold text-slate-800 text-lg">
             {drop.firstName} {drop.lastName}
           </h3>
+          {aiDepartment && (
+            <div className="mt-1 mb-1">
+              <span className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-100 text-xs font-semibold px-2.5 py-1 rounded-full">
+                🏢 {aiDepartment}
+                <span className="text-indigo-400 font-normal">· IA</span>
+              </span>
+            </div>
+          )}
           <div className="flex flex-wrap gap-3 text-sm text-slate-500 mt-1">
             <span>✉️ {drop.email}</span>
             {drop.phone && <span>📱 {drop.phone}</span>}

@@ -33,10 +33,10 @@ export async function POST(
     return NextResponse.json({ error: "El análisis con IA falló. Verificá OPENROUTER_API_KEY." }, { status: 500 });
   }
 
-  // Auto-fill profile fields only if not already set by the applicant
   const updates: Record<string, unknown> = {
     aiSummary: result.summary,
     aiProfile: JSON.stringify(result.profile),
+    aiDepartment: result.profile.suggestedDepartment ?? null,
   };
 
   if (!app.skills && result.profile.skills.length > 0) {

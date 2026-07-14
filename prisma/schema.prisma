@@ -40,6 +40,7 @@ model Application {
   cvText            String?                    @db.LongText
   aiSummary         String?                    @db.Text
   aiProfile         String?                    @db.Text
+  aiDepartment      String?
   coverLetter       String?                    @db.Text
   cvPath            String?
   status            String                     @default("pending")
@@ -75,9 +76,10 @@ model CvDrop {
   coverLetter       String?  @db.Text
   cvPath            String?
   cvText            String?  @db.LongText
-  aiSummary         String?  @db.Text
-  aiProfile         String?  @db.Text
-  reviewed          Boolean  @default(false)
+  aiSummary            String?  @db.Text
+  aiProfile            String?  @db.Text
+  aiDepartment         String?
+  reviewed             Boolean  @default(false)
   createdAt         DateTime @default(now())
 }
 

@@ -19,7 +19,7 @@ export default async function CvDropsPage() {
       yearsExperience: true, educationLevel: true, workMode: true,
       availability: true, salaryExpectation: true,
       skills: true, coverLetter: true, cvPath: true, cvText: true,
-      aiSummary: true, aiProfile: true, reviewed: true, createdAt: true,
+      aiSummary: true, aiProfile: true, aiDepartment: true, reviewed: true, createdAt: true,
     },
   });
 

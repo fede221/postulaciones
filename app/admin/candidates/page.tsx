@@ -57,7 +57,7 @@ export default async function CandidatesPage({
         city: true, phone: true, linkedinUrl: true,
         yearsExperience: true, educationLevel: true, workMode: true,
         availability: true, salaryExpectation: true,
-        skills: true, aiProfile: true, cvText: true, coverLetter: true,
+        skills: true, aiProfile: true, aiDepartment: true, cvText: true, coverLetter: true,
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
@@ -68,7 +68,11 @@ export default async function CandidatesPage({
   const normalizedDrops = rawDrops.map((d) => ({
     ...d,
     status: "spontaneous" as const,
-    job: { id: "", title: "Postulación espontánea", department: "Espontáneo" },
+    job: {
+      id: "",
+      title: "Postulación espontánea",
+      department: d.aiDepartment ?? "Espontáneo",
+    },
     source: "drop" as const,
   }));
 
@@ -87,9 +91,13 @@ export default async function CandidatesPage({
   const totalWithSkills = allApplications.filter((a) => a.skills).length;
   const totalPending = allApplications.filter((a) => a.cvText === null && (a as { cvPath?: string | null }).cvPath !== null).length;
 
-  // Filter pipeline — dept filter applies only to applications (drops have synthetic department)
+  // Filter pipeline — for drops, match against aiDepartment if set
   let filtered = allApplications as typeof allApplications;
-  if (dept) filtered = filtered.filter((a) => a.source === "application" && a.job.department === dept);
+  if (dept) filtered = filtered.filter((a) =>
+    a.source === "application"
+      ? a.job.department === dept
+      : ("aiDepartment" in a && a.aiDepartment === dept)
+  );
   if (exp) filtered = filtered.filter((a) => a.yearsExperience != null && a.yearsExperience >= parseInt(exp));
   if (edu) filtered = filtered.filter((a) => a.educationLevel === edu);
 
@@ -280,11 +288,15 @@ export default async function CandidatesPage({
                         </div>
 
                         <div className="flex flex-wrap gap-1.5 mb-2">
-                          {app.source === "application" && (
+                          {app.source === "application" ? (
                             <span className="bg-blue-50 text-blue-600 text-xs font-semibold px-2 py-0.5 rounded">
                               {app.job.department} · {app.job.title}
                             </span>
-                          )}
+                          ) : ("aiDepartment" in app && app.aiDepartment) ? (
+                            <span className="bg-indigo-50 text-indigo-700 border border-indigo-100 text-xs font-semibold px-2 py-0.5 rounded-full">
+                              🏢 {app.aiDepartment} <span className="font-normal opacity-60">· IA</span>
+                            </span>
+                          ) : null}
                           <span className="text-xs text-slate-400">{`${String(new Date(app.createdAt).getDate()).padStart(2,"0")}/${String(new Date(app.createdAt).getMonth()+1).padStart(2,"0")}/${new Date(app.createdAt).getFullYear()}`}</span>
                         </div>
 
