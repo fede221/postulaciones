@@ -58,6 +58,19 @@ model ApplicationStatusHistory {
   createdAt     DateTime    @default(now())
 }
 
+model CvDrop {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String
+  phone     String?
+  message   String?  @db.Text
+  cvPath    String?
+  cvText    String?  @db.LongText
+  reviewed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
 model Admin {
   id        String   @id @default(cuid())
   email     String   @unique

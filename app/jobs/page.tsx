@@ -2,6 +2,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
+import CvDropSection from "./CvDropSection";
 
 export const dynamic = "force-dynamic";
 
@@ -160,6 +161,7 @@ export default async function JobsPage({
         </div>
       </div>
 
+      <CvDropSection />
       <Footer />
     </div>
   );
