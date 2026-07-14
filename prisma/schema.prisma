@@ -59,16 +59,24 @@ model ApplicationStatusHistory {
 }
 
 model CvDrop {
-  id        String   @id @default(cuid())
-  firstName String
-  lastName  String
-  email     String
-  phone     String?
-  message   String?  @db.Text
-  cvPath    String?
-  cvText    String?  @db.LongText
-  reviewed  Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id                String   @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String
+  phone             String?
+  city              String?
+  linkedinUrl       String?
+  yearsExperience   Int?
+  educationLevel    String?
+  workMode          String?
+  availability      String?
+  salaryExpectation String?
+  skills            String?  @db.Text
+  coverLetter       String?  @db.Text
+  cvPath            String?
+  cvText            String?  @db.LongText
+  reviewed          Boolean  @default(false)
+  createdAt         DateTime @default(now())
 }
 
 model Admin {
