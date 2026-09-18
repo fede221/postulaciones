@@ -1,17 +1,25 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Field, FileInput, FormError, Input, Select, Textarea } from "@/components/ui/input";
 
-const inputClass =
-  "w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white";
-const selectClass =
-  "w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white appearance-none";
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function FormSection({
+  title,
+  first,
+  children,
+}: {
+  title: string;
+  first?: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <h2 className="text-lg font-bold text-slate-700 mb-4 pb-2 border-b border-slate-100">
+    <section className={first ? undefined : "border-t border-border pt-8"}>
+      <h2 className="mb-4 text-sm font-medium text-foreground">{title}</h2>
       {children}
-    </h2>
+    </section>
   );
 }
 
@@ -35,8 +43,14 @@ export default function ApplyForm({ jobId }: { jobId: string }) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Error al enviar la postulación");
+        let message = "Error al enviar la postulación";
+        try {
+          const data = (await res.json()) as { error?: string };
+          if (data?.error) message = data.error;
+        } catch {
+          if (res.status === 429) message = "Demasiados intentos. Esperá unos minutos y volvé a probar.";
+        }
+        throw new Error(message);
       }
 
       setSuccess(true);
@@ -50,63 +64,69 @@ export default function ApplyForm({ jobId }: { jobId: string }) {
 
   if (success) {
     return (
-      <div className="text-center py-12">
-        <div className="text-6xl mb-4">🎉</div>
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">¡Postulación enviada!</h2>
-        <p className="text-slate-500">Redirigiendo...</p>
-      </div>
+      <Card className="flex flex-col items-center p-8 text-center sm:p-10">
+        <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-border bg-background-secondary text-success">
+          <CheckCircle2 className="size-6" strokeWidth={1.5} aria-hidden />
+        </div>
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Postulación enviada</h2>
+        <p className="mt-1 text-sm text-foreground-muted">Redirigiendo...</p>
+      </Card>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="relative space-y-8">
       <input type="hidden" name="jobId" value={jobId} />
 
-      {/* 1. Datos personales */}
-      <div>
-        <SectionTitle>Datos personales</SectionTitle>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Nombre *</label>
-            <input name="firstName" required className={inputClass} placeholder="Juan" />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Apellido *</label>
-            <input name="lastName" required className={inputClass} placeholder="Pérez" />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Email *</label>
-            <input name="email" type="email" required className={inputClass} placeholder="juan@email.com" />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Teléfono</label>
-            <input name="phone" type="tel" className={inputClass} placeholder="+54 11 1234-5678" />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Ciudad / Localidad</label>
-            <input name="city" className={inputClass} placeholder="Buenos Aires" />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">LinkedIn</label>
-            <input
-              name="linkedinUrl"
-              type="url"
-              className={inputClass}
-              placeholder="https://linkedin.com/in/tu-perfil"
-            />
-          </div>
-        </div>
+      {/* Honeypot: los humanos no lo ven; si viene completo, el servidor lo descarta */}
+      <div aria-hidden="true" className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden">
+        <label>
+          No completar
+          <input name="website" type="text" tabIndex={-1} autoComplete="off" />
+        </label>
       </div>
 
+      {/* 1. Datos personales */}
+      <FormSection title="Datos personales" first>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Nombre" hint="*" htmlFor="firstName">
+            <Input id="firstName" name="firstName" required placeholder="Juan" autoComplete="given-name" />
+          </Field>
+          <Field label="Apellido" hint="*" htmlFor="lastName">
+            <Input id="lastName" name="lastName" required placeholder="Pérez" autoComplete="family-name" />
+          </Field>
+          <Field label="Email" hint="*" htmlFor="email">
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="juan@email.com"
+              autoComplete="email"
+            />
+          </Field>
+          <Field label="Teléfono" htmlFor="phone">
+            <Input id="phone" name="phone" type="tel" placeholder="+54 11 1234-5678" autoComplete="tel" />
+          </Field>
+          <Field label="Ciudad / Localidad" htmlFor="city">
+            <Input id="city" name="city" placeholder="Buenos Aires" autoComplete="address-level2" />
+          </Field>
+          <Field label="LinkedIn" htmlFor="linkedinUrl">
+            <Input
+              id="linkedinUrl"
+              name="linkedinUrl"
+              type="url"
+              placeholder="https://linkedin.com/in/tu-perfil"
+            />
+          </Field>
+        </div>
+      </FormSection>
+
       {/* 2. Perfil profesional */}
-      <div>
-        <SectionTitle>Perfil profesional</SectionTitle>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">
-              Años de experiencia
-            </label>
-            <select name="yearsExperience" className={selectClass}>
+      <FormSection title="Perfil profesional">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Años de experiencia" htmlFor="yearsExperience">
+            <Select id="yearsExperience" name="yearsExperience">
               <option value="">Sin experiencia previa</option>
               <option value="1">1 año</option>
               <option value="2">2 años</option>
@@ -115,13 +135,10 @@ export default function ApplyForm({ jobId }: { jobId: string }) {
               <option value="7">6–8 años</option>
               <option value="10">9–10 años</option>
               <option value="15">Más de 10 años</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">
-              Nivel de estudios
-            </label>
-            <select name="educationLevel" className={selectClass}>
+            </Select>
+          </Field>
+          <Field label="Nivel de estudios" htmlFor="educationLevel">
+            <Select id="educationLevel" name="educationLevel">
               <option value="">Seleccioná...</option>
               <option value="secundario">Secundario completo</option>
               <option value="terciario">Terciario / Técnico</option>
@@ -129,113 +146,90 @@ export default function ApplyForm({ jobId }: { jobId: string }) {
               <option value="universitario">Universitario completo</option>
               <option value="posgrado">Posgrado / Maestría</option>
               <option value="doctorado">Doctorado</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">
-              Modalidad preferida
-            </label>
-            <select name="workMode" className={selectClass}>
+            </Select>
+          </Field>
+          <Field label="Modalidad preferida" htmlFor="workMode">
+            <Select id="workMode" name="workMode">
               <option value="">Seleccioná...</option>
               <option value="presencial">Presencial</option>
               <option value="hibrido">Híbrido</option>
               <option value="remoto">Remoto</option>
               <option value="indiferente">Indiferente</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">
-              Disponibilidad para ingresar
-            </label>
-            <select name="availability" className={selectClass}>
+            </Select>
+          </Field>
+          <Field label="Disponibilidad para ingresar" htmlFor="availability">
+            <Select id="availability" name="availability">
               <option value="">Seleccioná...</option>
               <option value="inmediata">Inmediata</option>
               <option value="2_semanas">En 2 semanas</option>
               <option value="1_mes">En 1 mes</option>
               <option value="2_meses">En 2 meses</option>
               <option value="a_convenir">A convenir</option>
-            </select>
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-semibold text-slate-600 mb-1">
-              Pretensión salarial{" "}
-              <span className="text-slate-400 font-normal">(bruta mensual, opcional)</span>
-            </label>
-            <input
+            </Select>
+          </Field>
+          <Field
+            label="Pretensión salarial"
+            hint="(bruta mensual, opcional)"
+            htmlFor="salaryExpectation"
+            className="sm:col-span-2"
+          >
+            <Input
+              id="salaryExpectation"
               name="salaryExpectation"
-              className={inputClass}
-              placeholder="Ej: $800.000 – $1.000.000 o &quot;A convenir&quot;"
+              placeholder='Ej: $800.000 – $1.000.000 o "A convenir"'
             />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-semibold text-slate-600 mb-1">
-              Habilidades y tecnologías{" "}
-              <span className="text-slate-400 font-normal">(separá con comas)</span>
-            </label>
-            <textarea
+          </Field>
+          <Field
+            label="Habilidades y tecnologías"
+            hint="(separá con comas)"
+            help="Incluí herramientas, lenguajes, certificaciones o cualquier habilidad relevante."
+            htmlFor="skills"
+            className="sm:col-span-2"
+          >
+            <Textarea
+              id="skills"
               name="skills"
               rows={3}
-              className={`${inputClass} resize-none`}
               placeholder="Ej: Excel, SAP, Manipulación de alimentos, HACCP, Montacargas, Frío, Conducción, Torno, Liquidación de sueldos..."
             />
-            <p className="text-xs text-slate-400 mt-1">
-              Incluí herramientas, lenguajes, certificaciones o cualquier habilidad relevante.
-            </p>
-          </div>
+          </Field>
         </div>
-      </div>
+      </FormSection>
 
       {/* 3. CV */}
-      <div>
-        <SectionTitle>Curriculum Vitae</SectionTitle>
-        <label className="block text-sm font-semibold text-slate-600 mb-1">
-          Adjuntar CV{" "}
-          <span className="text-slate-400 font-normal">(PDF, DOC, DOCX — máx. 5 MB)</span>
-        </label>
-        <input
-          name="cv"
-          type="file"
-          accept=".pdf,.doc,.docx"
-          className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100"
-        />
-      </div>
+      <FormSection title="Curriculum Vitae">
+        <Field label="Adjuntar CV" hint="(PDF, DOC, DOCX, máx. 5 MB)" htmlFor="cv">
+          <FileInput id="cv" name="cv" accept=".pdf,.doc,.docx" />
+        </Field>
+      </FormSection>
 
       {/* 4. Carta de presentación */}
-      <div>
-        <SectionTitle>Carta de presentación</SectionTitle>
-        <label className="block text-sm font-semibold text-slate-600 mb-1">
-          ¿Por qué querés trabajar en DB Consulting?{" "}
-          <span className="text-slate-400 font-normal">(opcional)</span>
-        </label>
-        <textarea
-          name="coverLetter"
-          rows={5}
-          className={`${inputClass} resize-none`}
-          placeholder="Contanos sobre vos y por qué este puesto te interesa..."
-        />
-      </div>
+      <FormSection title="Carta de presentación">
+        <Field label="¿Por qué querés trabajar en DB Consulting?" hint="(opcional)" htmlFor="coverLetter">
+          <Textarea
+            id="coverLetter"
+            name="coverLetter"
+            rows={5}
+            placeholder="Contanos sobre vos y por qué este puesto te interesa..."
+          />
+        </Field>
+      </FormSection>
 
-      {error && (
-        <div className="bg-red-50 text-red-700 border border-red-200 rounded-lg px-4 py-3 text-sm">
-          {error}
-        </div>
-      )}
+      <FormError>{error}</FormError>
 
-      <div className="flex flex-col sm:flex-row gap-3 pt-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {loading ? "Enviando..." : "Enviar postulación →"}
-        </button>
-        <button
+      <div className="flex flex-col gap-3 border-t border-border pt-8 sm:flex-row">
+        <Button type="submit" size="lg" loading={loading} className="w-full sm:w-auto sm:flex-1">
+          {loading ? "Enviando..." : "Enviar postulación"}
+        </Button>
+        <Button
           type="button"
-          onClick={() => history.back()}
-          className="flex-1 sm:flex-none sm:px-6 border border-slate-200 text-slate-600 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
+          variant="secondary"
+          size="lg"
+          onClick={() => router.back()}
+          className="w-full sm:w-auto"
         >
           Volver
-        </button>
+        </Button>
       </div>
     </form>
   );

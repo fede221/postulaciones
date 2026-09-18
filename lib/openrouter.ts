@@ -41,7 +41,7 @@ export interface AiProfile {
 // Tries to parse JSON that may be truncated mid-stream
 function safeParseJson(raw: string): AiProfile | null {
   // Strip markdown fences
-  let str = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
+  const str = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
 
   // Try as-is first
   try { return JSON.parse(str) as AiProfile; } catch { /* continue */ }
@@ -138,18 +138,26 @@ IMPORTANTE: suggestedDepartment debe ser exactamente uno de los departamentos li
       return null;
     }
 
-    // Ensure required fields have defaults
-    profile.skills = profile.skills ?? [];
-    profile.previousRoles = profile.previousRoles ?? [];
-    profile.previousCompanies = profile.previousCompanies ?? [];
-    profile.languages = profile.languages ?? [];
-    profile.highlights = profile.highlights ?? [];
+    // The model's output is untrusted: coerce every field to the shape the app relies on.
+    const strings = (v: unknown): string[] =>
+      Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x.trim() !== "").slice(0, 40) : [];
+    profile.summary = typeof profile.summary === "string" ? profile.summary.slice(0, 1200) : "";
+    profile.skills = strings(profile.skills);
+    profile.previousRoles = strings(profile.previousRoles);
+    profile.previousCompanies = strings(profile.previousCompanies);
+    profile.languages = strings(profile.languages);
+    profile.highlights = strings(profile.highlights);
+    profile.yearsExperience =
+      typeof profile.yearsExperience === "number" && Number.isInteger(profile.yearsExperience) &&
+      profile.yearsExperience >= 0 && profile.yearsExperience <= 60
+        ? profile.yearsExperience
+        : null;
+    profile.educationLevel = typeof profile.educationLevel === "string" ? profile.educationLevel.slice(0, 60) : null;
+    if (!["alta", "media", "baja"].includes(profile.departmentConfidence as string)) profile.departmentConfidence = null;
     profile.suggestedDepartment = COMPANY_DEPARTMENTS.includes(profile.suggestedDepartment as CompanyDepartment)
       ? profile.suggestedDepartment
       : null;
-    profile.departmentConfidence = profile.departmentConfidence ?? null;
-
-    return { summary: profile.summary ?? "", profile };
+    return { summary: profile.summary, profile };
   } catch (e) {
     console.error("[openrouter] Failed:", e);
     return null;

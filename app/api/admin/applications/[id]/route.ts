@@ -1,49 +1,51 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminRoute, BadRequest, readJson } from "@/lib/adminApi";
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+const STATUSES = ["pending", "reviewing", "accepted", "rejected"] as const;
+type Ctx = { params: Promise<{ id: string }> };
 
+/** Accepts ONLY `status` (+ optional `note` for the history) and `notes` (internal notes). */
+export const PATCH = adminRoute<Ctx>(async (req, { params }) => {
   const { id } = await params;
-  const body = await req.json();
-  const { status, note, notes, ...rest } = body;
+  const body = await readJson(req);
 
-  // Fetch current application to know the previous status
-  const current = await prisma.application.findUnique({ where: { id } });
+  let status: string | undefined;
+  if (body.status !== undefined) {
+    if (typeof body.status !== "string" || !(STATUSES as readonly string[]).includes(body.status)) {
+      throw new BadRequest("Estado inválido.");
+    }
+    status = body.status;
+  }
+
+  let notes: string | undefined;
+  if (body.notes !== undefined) {
+    if (typeof body.notes !== "string") throw new BadRequest("Las notas deben ser texto.");
+    notes = body.notes.slice(0, 10000);
+  }
+
+  const note = typeof body.note === "string" && body.note.trim() ? body.note.trim().slice(0, 2000) : null;
+
+  const current = await prisma.application.findUnique({ where: { id }, select: { status: true } });
   if (!current) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 
-  const updateData: Record<string, unknown> = { ...rest };
-  if (notes !== undefined) updateData.notes = notes;
-  if (status !== undefined) updateData.status = status;
+  const data = {
+    ...(notes !== undefined ? { notes } : {}),
+    ...(status !== undefined ? { status } : {}),
+  };
+  const include = { statusHistory: { orderBy: { createdAt: "asc" as const } } };
 
-  // Write status history entry if status is changing
   if (status !== undefined && status !== current.status) {
-    const [app] = await prisma.$transaction([
-      prisma.application.update({
-        where: { id },
-        data: updateData,
-        include: { statusHistory: { orderBy: { createdAt: "asc" } } },
-      }),
+    // History entry first so the returned application already includes it.
+    const [, app] = await prisma.$transaction([
       prisma.applicationStatusHistory.create({
-        data: {
-          applicationId: id,
-          fromStatus: current.status,
-          toStatus: status,
-          note: note?.trim() || null,
-        },
+        data: { applicationId: id, fromStatus: current.status, toStatus: status, note },
       }),
+      prisma.application.update({ where: { id }, data, include }),
     ]);
     return NextResponse.json(app);
   }
 
-  const app = await prisma.application.update({
-    where: { id },
-    data: updateData,
-    include: { statusHistory: { orderBy: { createdAt: "asc" } } },
-  });
-
+  const app = await prisma.application.update({ where: { id }, data, include });
   return NextResponse.json(app);
-}
+});

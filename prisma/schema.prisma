@@ -47,6 +47,11 @@ model Application {
   notes             String?                    @db.Text
   createdAt         DateTime                   @default(now())
   statusHistory     ApplicationStatusHistory[]
+
+  @@index([email])
+  @@index([status])
+  @@index([jobId])
+  @@index([createdAt])
 }
 
 model ApplicationStatusHistory {
@@ -57,6 +62,8 @@ model ApplicationStatusHistory {
   toStatus      String
   note          String?     @db.Text
   createdAt     DateTime    @default(now())
+
+  @@index([applicationId])
 }
 
 model CvDrop {
@@ -81,6 +88,9 @@ model CvDrop {
   aiDepartment         String?
   reviewed             Boolean  @default(false)
   createdAt         DateTime @default(now())
+
+  @@index([email])
+  @@index([createdAt])
 }
 
 model Admin {

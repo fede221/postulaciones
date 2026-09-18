@@ -1,19 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminRoute, readJson } from "@/lib/adminApi";
 import { extractCvText } from "@/lib/extractCvText";
 
 // POST /api/admin/applications/extract-cv
 // Body: { id } — extract text for one application
 // Body: { all: true } — extract text for all applications with cvPath but no cvText
-export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const POST = adminRoute(async (req) => {
+  const body = await readJson(req);
 
-  const body = await req.json();
-
-  if (body.all) {
+  if (body.all === true) {
     const apps = await prisma.application.findMany({
       where: { cvPath: { not: null }, cvText: null },
       select: { id: true, cvPath: true },
@@ -32,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ processed, total: apps.length });
   }
 
-  if (body.id) {
+  if (typeof body.id === "string" && body.id) {
     const app = await prisma.application.findUnique({
       where: { id: body.id },
       select: { id: true, cvPath: true },
@@ -48,4 +44,4 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ error: "Falta id o all:true" }, { status: 400 });
-}
+});

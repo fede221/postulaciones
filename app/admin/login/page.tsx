@@ -2,6 +2,11 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Wordmark } from "@/components/Logo";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Field, FormError, Input } from "@/components/ui/input";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,70 +19,75 @@ export default function LoginPage() {
     setError("");
 
     const formData = new FormData(e.currentTarget);
-    const result = await signIn("credentials", {
-      email: formData.get("email"),
-      password: formData.get("password"),
-      redirect: false,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email: formData.get("email"),
+        password: formData.get("password"),
+        redirect: false,
+      });
 
-    if (result?.error) {
-      setError("Email o contraseña incorrectos");
+      if (!result || result.error) {
+        setError("Email o contraseña incorrectos. Si probaste varias veces, esperá unos minutos.");
+        setLoading(false);
+        return;
+      }
+      router.push("/admin/dashboard");
+    } catch {
+      setError("No pudimos conectarnos. Revisá tu conexión e intentá de nuevo.");
       setLoading(false);
-    } else {
-      router.push("/admin/jobs");
     }
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-lg">ME</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-800">Panel Administrativo</h1>
-          <p className="text-slate-500 text-sm mt-1">Ingresá con tus credenciales</p>
-        </div>
+    <div className="relative flex min-h-screen items-center justify-center px-5 py-12 animate-in">
+      <div className="absolute right-5 top-5">
+        <ThemeToggle />
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Email</label>
-            <input
-              name="email"
-              type="email"
-              required
-              defaultValue="admin@empresa.com"
-              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-600 mb-1">Contraseña</label>
-            <input
-              name="password"
-              type="password"
-              required
-              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-
-          {error && (
-            <div className="bg-red-50 text-red-700 border border-red-200 rounded-lg px-4 py-2 text-sm">
-              {error}
+      <div className="w-full max-w-sm">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="mb-6 flex flex-col items-center text-center">
+              <Wordmark size="lg" />
+              <h1 className="mt-5 text-xl text-foreground">Panel de selección</h1>
+              <p className="mt-1 text-sm text-foreground-muted">Ingresá con tu cuenta de RRHH</p>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-60"
-          >
-            {loading ? "Ingresando..." : "Ingresar"}
-          </button>
-        </form>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Field label="Email" htmlFor="login-email">
+                <Input
+                  id="login-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="nombre@empresa.com"
+                />
+              </Field>
+              <Field label="Contraseña" htmlFor="login-password">
+                <Input
+                  id="login-password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                />
+              </Field>
 
-        <p className="text-xs text-slate-400 text-center mt-6">
-          Credenciales por defecto: admin@empresa.com / admin123
-        </p>
+              <FormError>{error}</FormError>
+
+              <Button type="submit" variant="primary" className="w-full" loading={loading}>
+                Ingresar
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <div className="mt-4 flex justify-center">
+          <ButtonLink href="/" variant="ghost" size="sm">
+            Volver al sitio
+          </ButtonLink>
+        </div>
       </div>
     </div>
   );

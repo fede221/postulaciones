@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Eyebrow } from "@/components/ui/page-header";
 import CvDropForm from "./CvDropForm";
 
 export const metadata = {
@@ -8,26 +9,25 @@ export const metadata = {
 
 export default function CvDropPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
 
-      <div className="max-w-3xl mx-auto px-4 py-10 w-full flex-1">
-        <div className="bg-white rounded-2xl border border-slate-200 p-8">
-          <div className="mb-8">
-            <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-              Postulación espontánea
-            </span>
-            <h1 className="text-3xl font-extrabold text-slate-800 mb-2">
+      <main className="container-x flex-1 py-12 sm:py-16">
+        <div className="mx-auto w-full max-w-2xl">
+          <header className="mb-8 border-b border-border pb-8">
+            <Eyebrow className="mb-3">Postulación espontánea</Eyebrow>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
               Dejá tu CV
             </h1>
-            <p className="text-slate-500">
-              Completá el formulario y te contactamos cuando surja una oportunidad que se adapte a tu perfil.
+            <p className="mt-2 text-sm text-foreground-muted sm:text-base">
+              Completá el formulario y te contactamos cuando surja una oportunidad que se adapte a tu
+              perfil. No hace falta que te postules a un puesto específico.
             </p>
-          </div>
+          </header>
 
           <CvDropForm />
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>

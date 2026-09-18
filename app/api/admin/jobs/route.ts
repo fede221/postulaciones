@@ -1,22 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminRoute, optionalBoolean, readJson } from "@/lib/adminApi";
+import { parseJobFields } from "@/lib/jobFields";
 
-export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-
-  const body = await req.json();
-  const { title, department, location, type, description, requirements, isActive } = body;
-
-  if (!title || !department || !location || !type || !description || !requirements) {
-    return NextResponse.json({ error: "Todos los campos son obligatorios" }, { status: 400 });
-  }
-
+export const POST = adminRoute(async (req) => {
+  const body = await readJson(req);
   const job = await prisma.job.create({
-    data: { title, department, location, type, description, requirements, isActive: isActive ?? true },
+    data: { ...parseJobFields(body), isActive: optionalBoolean(body.isActive) ?? true },
   });
-
   return NextResponse.json(job);
-}
+});

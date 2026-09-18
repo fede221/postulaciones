@@ -8,8 +8,11 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   // Admin
-  const email = process.env.ADMIN_EMAIL || "admin@empresa.com";
-  const password = process.env.ADMIN_PASSWORD || "admin123";
+  const email = (process.env.ADMIN_EMAIL || "admin@empresa.com").toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) {
+    throw new Error("Definí ADMIN_PASSWORD en .env antes de correr el seed (no hay contraseña por defecto).");
+  }
   const existing = await prisma.admin.findUnique({ where: { email } });
   if (!existing) {
     const hashed = await bcrypt.hash(password, 10);

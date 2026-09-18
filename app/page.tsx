@@ -1,144 +1,271 @@
 import Link from "next/link";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Clock,
+  FileUp,
+  Lightbulb,
+  MapPin,
+  Scale,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
-import { seedAdmin } from "@/lib/seed";
+import { COMPANY_DEPARTMENTS } from "@/lib/openrouter";
+import { ButtonLink } from "@/components/ui/button";
+import { toneFor } from "@/components/ui/badge";
+import { HeroShader } from "@/components/fx/HeroShader";
+import { Reveal, SplitWords } from "@/components/fx/Reveal";
+import { Marquee } from "@/components/fx/Marquee";
 
 export const dynamic = "force-dynamic";
 
-const benefits = [
-  { icon: "🚀", title: "Crecimiento profesional", desc: "Planes de carrera y capacitaciones continuas para que sigas creciendo." },
-  { icon: "🤝", title: "Equipo colaborativo", desc: "Un ambiente de trabajo donde la colaboración y el respeto son el centro." },
-  { icon: "⚖️", title: "Equilibrio vida-trabajo", desc: "Flexibilidad horaria y modalidades híbridas para que cuides tu bienestar." },
-  { icon: "💡", title: "Innovación constante", desc: "Trabajamos con tecnología de punta y desafiamos el status quo cada día." },
-];
+const TONE_CLASS = {
+  mint: "bg-mint text-mint-fg",
+  pink: "bg-pink text-pink-fg",
+  lemon: "bg-lemon text-lemon-fg",
+  sky: "bg-sky text-sky-fg",
+  peach: "bg-peach text-peach-fg",
+  lavender: "bg-lavender text-lavender-fg",
+} as const;
+
+function formatDate(d: Date) {
+  return new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "short" }).format(d);
+}
 
 export default async function Home() {
-  await seedAdmin();
+  const jobs = await prisma.job.findMany({ where: { isActive: true }, take: 3, orderBy: { createdAt: "desc" } });
 
-  const jobs = await prisma.job.findMany({
-    where: { isActive: true },
-    take: 3,
-    orderBy: { createdAt: "desc" },
-  });
+  const areas = COMPANY_DEPARTMENTS.filter((d) => d !== "Otro");
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
 
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white py-24 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="inline-block bg-white/20 text-white text-sm font-semibold px-4 py-1 rounded-full mb-6 backdrop-blur-sm">
-            Estamos contratando
-          </span>
-          <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
-            Construí tu carrera<br />con nosotros
-          </h1>
-          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-            En DB Consulting creemos que las personas son lo más importante. Buscamos talentos apasionados que quieran hacer la diferencia.
-          </p>
-          <Link
-            href="/jobs"
-            className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-700 rounded-xl font-bold text-lg hover:bg-blue-50 transition-colors shadow-lg"
-          >
-            Ver puestos disponibles →
-          </Link>
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <section className="relative -mt-[68px] overflow-hidden pt-[68px]">
+        <div className="pointer-events-none absolute inset-0 [mask-image:linear-gradient(180deg,black_60%,transparent_100%)]">
+          <HeroShader className="h-full w-full" />
         </div>
-      </section>
 
-      {/* Stats */}
-      <section className="bg-white py-12 border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { value: "+500", label: "Empleados" },
-            { value: "+10", label: "Años de trayectoria" },
-            { value: "4.8/5", label: "Satisfacción del equipo" },
-            { value: "+20", label: "Países con presencia" },
-          ].map((s) => (
-            <div key={s.label}>
-              <p className="text-3xl font-extrabold text-blue-600">{s.value}</p>
-              <p className="text-slate-500 text-sm mt-1">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Benefits */}
-      <section className="py-20 px-4 bg-slate-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-800">¿Por qué trabajar con nosotros?</h2>
-            <p className="text-slate-500 mt-3 max-w-xl mx-auto">
-              Ofrecemos un entorno donde podés desarrollarte, crecer y sentirte parte de algo más grande.
+        <div className="container-x relative flex min-h-[min(86vh,900px)] flex-col justify-center pb-20 pt-16 sm:pb-28 sm:pt-24">
+          <Reveal y={12} duration={0.6}>
+            <p className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-foreground/10 bg-background/60 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-foreground-muted backdrop-blur">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-mint-fg/60 motion-reduce:hidden" />
+                <span className="relative inline-flex size-2 rounded-full bg-mint-fg" />
+              </span>
+              Estamos contratando
             </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {benefits.map((b) => (
-              <div key={b.title} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                <div className="text-4xl mb-4">{b.icon}</div>
-                <h3 className="font-bold text-slate-800 mb-2">{b.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{b.desc}</p>
-              </div>
-            ))}
+          </Reveal>
+
+          <h1 className="max-w-[14ch] text-[52px] leading-[0.98] tracking-[-0.035em] text-foreground sm:text-[88px] lg:text-[116px] xl:text-[136px]">
+            <SplitWords text="Tu próximo capítulo empieza acá." accent="capítulo" />
+          </h1>
+
+          <div className="mt-10 lg:mt-14">
+              <Reveal delay={0.45} y={16}>
+                <p className="max-w-xl text-[17px] leading-relaxed text-foreground-muted sm:text-xl">
+                  En DB Consulting buscamos personas que quieran crecer con nosotros. Mirá los puestos
+                  abiertos o dejanos tu CV para futuras búsquedas.
+                </p>
+              </Reveal>
+              <Reveal delay={0.6} y={16}>
+                <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <ButtonLink href="/jobs" size="xl">
+                    Ver puestos disponibles
+                    <ArrowRight strokeWidth={1.75} aria-hidden />
+                  </ButtonLink>
+                  <ButtonLink href="/cv-drop" variant="secondary" size="xl">
+                    <FileUp strokeWidth={1.75} aria-hidden />
+                    Dejar mi CV
+                  </ButtonLink>
+                </div>
+              </Reveal>
           </div>
         </div>
       </section>
 
-      {/* Latest Jobs */}
-      {jobs.length > 0 && (
-        <section className="py-20 px-4 bg-white">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-10">
-              <div>
-                <h2 className="text-3xl font-bold text-slate-800">Últimas oportunidades</h2>
-                <p className="text-slate-500 mt-1">Puestos publicados recientemente</p>
+      {/* ── Marquee de áreas ─────────────────────────────────────────────── */}
+      <section className="py-10 sm:py-14">
+        <Reveal y={10}>
+          <Marquee items={areas} speed={70} />
+        </Reveal>
+      </section>
+
+      {/* ── Bento: por qué DB ────────────────────────────────────────────── */}
+      <section className="container-x pb-20 pt-6 sm:pb-28 sm:pt-10">
+        <Reveal>
+          <div className="max-w-2xl">
+            <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.14em] text-foreground-subtle">Por qué DB Consulting</p>
+            <h2 className="text-[34px] leading-[1.05] tracking-[-0.02em] text-foreground sm:text-[48px]">
+              Un lugar para <span className="font-display-wonk italic text-sky-fg">desarrollarte</span>, no solo para trabajar.
+            </h2>
+          </div>
+        </Reveal>
+
+        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-6 xl:mt-14">
+          <Reveal className="md:col-span-4" delay={0.05}>
+            <div className="lift flex h-full flex-col justify-between rounded-2xl bg-mint p-7 text-mint-fg shadow-soft sm:p-9">
+              <div className="flex items-start justify-between">
+                <span className="flex size-11 items-center justify-center rounded-full bg-background/70">
+                  <TrendingUp className="size-5" strokeWidth={1.75} />
+                </span>
+                <div className="flex h-14 items-end gap-1.5" aria-hidden>
+                  {[30, 45, 40, 60, 55, 75, 100].map((h, i) => (
+                    <span key={i} className={`w-3 rounded-full ${i === 6 ? "bg-current" : "bg-current/25"}`} style={{ height: `${h}%` }} />
+                  ))}
+                </div>
               </div>
-              <Link href="/jobs" className="text-blue-600 hover:text-blue-700 font-semibold text-sm hidden sm:block">
-                Ver todos →
+              <div className="mt-10">
+                <h3 className="font-display text-[30px] leading-tight sm:text-[36px]">Crecimiento profesional</h3>
+                <p className="mt-3 max-w-md text-sm leading-relaxed opacity-80 sm:text-[15px]">
+                  Planes de carrera y capacitaciones continuas para que sigas creciendo, sea cual sea el área en la que entrás.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal className="md:col-span-2" delay={0.12}>
+            <div className="lift flex h-full flex-col justify-between rounded-2xl bg-lemon p-7 text-lemon-fg shadow-soft">
+              <span className="flex size-11 items-center justify-center rounded-full bg-background/70">
+                <Users className="size-5" strokeWidth={1.75} />
+              </span>
+              <div className="mt-10">
+                <h3 className="font-display text-[26px] leading-tight">Equipo colaborativo</h3>
+                <p className="mt-3 text-sm leading-relaxed opacity-80">Colaboración y respeto en el centro de todo.</p>
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal className="md:col-span-2" delay={0.18}>
+            <div className="lift flex h-full flex-col justify-between rounded-2xl bg-sky p-7 text-sky-fg shadow-soft">
+              <span className="flex size-11 items-center justify-center rounded-full bg-background/70">
+                <Scale className="size-5" strokeWidth={1.75} />
+              </span>
+              <div className="mt-10">
+                <h3 className="font-display text-[26px] leading-tight">Equilibrio vida-trabajo</h3>
+                <p className="mt-3 text-sm leading-relaxed opacity-80">Flexibilidad y modalidades híbridas para cuidar tu bienestar.</p>
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal className="md:col-span-4" delay={0.24}>
+            <div className="lift flex h-full flex-col justify-between rounded-2xl bg-inverse p-7 text-inverse-foreground shadow-lift sm:flex-row sm:items-end sm:gap-8 sm:p-9">
+              <div>
+                <span className="flex size-11 items-center justify-center rounded-full bg-inverse-foreground/10">
+                  <Lightbulb className="size-5" strokeWidth={1.75} />
+                </span>
+                <h3 className="mt-10 font-display text-[30px] leading-tight sm:text-[36px]">Innovación constante</h3>
+                <p className="mt-3 max-w-md text-sm leading-relaxed opacity-70 sm:text-[15px]">
+                  Trabajamos con tecnología de punta y desafiamos el status quo cada día.
+                </p>
+              </div>
+              <ButtonLink href="/jobs" variant="inverted" className="mt-6 shrink-0 sm:mt-0">
+                Sumate
+                <ArrowUpRight strokeWidth={1.75} aria-hidden />
+              </ButtonLink>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── Últimas oportunidades ────────────────────────────────────────── */}
+      {jobs.length > 0 && (
+        <section className="container-x pb-20 sm:pb-28">
+          <Reveal>
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.14em] text-foreground-subtle">Recién publicados</p>
+                <h2 className="text-[34px] leading-[1.05] tracking-[-0.02em] text-foreground sm:text-[48px]">
+                  Últimas <span className="font-display-wonk italic text-pink-fg">oportunidades</span>
+                </h2>
+              </div>
+              <Link
+                href="/jobs"
+                className="hidden items-center gap-1.5 text-sm text-foreground-muted transition-colors hover:text-foreground sm:inline-flex"
+              >
+                Ver todos
+                <ArrowRight className="size-4" strokeWidth={1.75} aria-hidden />
               </Link>
             </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {jobs.map((job) => (
-                <Link
-                  key={job.id}
-                  href={`/jobs/${job.id}`}
-                  className="block bg-slate-50 border border-slate-200 rounded-2xl p-6 hover:border-blue-300 hover:shadow-md transition-all group"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
-                      {job.department}
-                    </span>
-                    <span className="text-xs text-slate-400">{new Date(job.createdAt).toLocaleDateString("es-AR")}</span>
-                  </div>
-                  <h3 className="font-bold text-slate-800 text-lg group-hover:text-blue-600 transition-colors mb-2">
-                    {job.title}
-                  </h3>
-                  <div className="flex flex-wrap gap-3 mt-3">
-                    <span className="text-xs text-slate-500">📍 {job.location}</span>
-                    <span className="text-xs text-slate-500">🕐 {job.type}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
+          </Reveal>
+
+          <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+            {jobs.map((job, i) => {
+              const tone = toneFor(job.department);
+              return (
+                <Reveal key={job.id} delay={0.08 * i}>
+                  <Link
+                    href={`/jobs/${job.id}`}
+                    className="lift group flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-background shadow-soft"
+                    style={{ "--glow": `var(--${tone}-fg)` } as React.CSSProperties}
+                  >
+                    <div className={`flex items-center justify-between px-5 py-4 ${TONE_CLASS[tone]}`}>
+                      <span className="inline-flex h-6 items-center rounded-full bg-background/60 px-2.5 text-xs font-medium">
+                        {job.department}
+                      </span>
+                      <span className="font-mono text-[11px] opacity-70">{formatDate(job.createdAt)}</span>
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="font-display text-[24px] leading-tight text-foreground">{job.title}</h3>
+                      <div className="mt-auto flex items-end justify-between gap-3 pt-8">
+                        <div className="flex flex-col gap-1.5 text-xs text-foreground-subtle">
+                          <span className="inline-flex items-center gap-1.5">
+                            <MapPin className="size-3.5" strokeWidth={1.5} aria-hidden />
+                            {job.location}
+                          </span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <Clock className="size-3.5" strokeWidth={1.5} aria-hidden />
+                            {job.type}
+                          </span>
+                        </div>
+                        <span className="arrow-btn">
+                          <ArrowUpRight className="size-4 transition-transform duration-300 ease-[var(--ease-out-expo)] group-hover:rotate-45" strokeWidth={1.75} />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </Reveal>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 sm:hidden">
+            <ButtonLink href="/jobs" variant="secondary" className="w-full">
+              Ver todos los puestos
+            </ButtonLink>
           </div>
         </section>
       )}
 
-      {/* CTA */}
-      <section className="py-20 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">¿Listo para dar el próximo paso?</h2>
-          <p className="text-blue-100 mb-8 text-lg">
-            Explorá nuestras vacantes y postulate hoy. Estamos buscando personas como vos.
-          </p>
-          <Link
-            href="/jobs"
-            className="inline-flex items-center px-8 py-4 bg-white text-blue-700 rounded-xl font-bold text-lg hover:bg-blue-50 transition-colors"
-          >
-            Ver puestos disponibles
-          </Link>
-        </div>
+      {/* ── CTA ──────────────────────────────────────────────────────────── */}
+      <section className="container-x pb-16 sm:pb-24">
+        <Reveal>
+          <div className="relative overflow-hidden rounded-3xl bg-inverse px-6 py-14 text-inverse-foreground shadow-lift sm:px-14 sm:py-20">
+            <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-mint/20 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 left-1/3 size-72 rounded-full bg-sky/20 blur-3xl" />
+            <div className="relative max-w-2xl">
+              <h2 className="text-[34px] leading-[1.05] tracking-[-0.02em] sm:text-[52px]">
+                ¿Listo para dar el <span className="font-display-wonk italic">próximo paso</span>?
+              </h2>
+              <p className="mt-4 max-w-lg text-sm opacity-75 sm:text-base">
+                Explorá nuestras vacantes y postulate hoy. Si no encontrás el puesto ideal, dejanos tu CV
+                y te contactamos cuando surja una oportunidad.
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <ButtonLink href="/jobs" variant="inverted" size="lg">
+                  Ver puestos disponibles
+                </ButtonLink>
+                <ButtonLink href="/cv-drop" variant="outline-inverted" size="lg">
+                  Dejar mi CV
+                </ButtonLink>
+              </div>
+            </div>
+          </div>
+        </Reveal>
       </section>
 
       <Footer />

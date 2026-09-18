@@ -35,5 +35,11 @@ npm run start
 
 ## Pendiente conocido (no bloquea el despliegue)
 
-- En el historial de git hay un CV real (`public/uploads/cvs/…pdf`, commit `178616b`). Esta versión
-  lo saca del árbol pero no del historial; purgarlo requiere reescribir la rama por defecto.
+- Hay un CV real versionado en git (`public/uploads/cvs/1783984569940-gq51frolsfd.pdf`, commit
+  `178616b`). **Esta versión no lo toca a propósito**: borrarlo del repo haría que un `git pull`
+  lo elimine del disco del servidor. Orden correcto para resolverlo más adelante:
+  1. en el servidor, `npx tsx scripts/migrate-cvs.ts` (lo mueve a `storage/cvs/`, privado);
+  2. recién ahí, un commit que lo quite del repo;
+  3. opcional: purgar el historial (requiere reescribir la rama por defecto y push forzado).
+  Mientras tanto ese archivo puntual sigue siendo accesible por URL directa, igual que antes;
+  todos los CVs **nuevos** ya se guardan en privado.
