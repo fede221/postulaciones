@@ -1,12 +1,326 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Design tokens — soft pastel system.
+   Light (default): sage-tinted canvas, white surfaces, charcoal ink, pastel
+   accents (mint / pink / lemon / sky / peach / lavender) for tags and charts.
+   Dark: warm charcoal canvas, slightly lighter surfaces, the same pastels
+   deepened so they stay legible.
+   ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --canvas: #eef4ec;
+  --canvas-gradient: linear-gradient(160deg, #eff6ea 0%, #e6f1ec 55%, #e9eef6 100%);
+  --background: #ffffff;
+  --background-secondary: #f3f6f2;
+  --foreground: #1e2321;
+  --foreground-muted: #66706a;
+  --foreground-subtle: #98a19b;
+  --border: #e3e9e3;
+  --border-strong: #cdd7cf;
+  --muted: #eef2ec;
+  --muted-hover: #e2e9e1;
+  --inverse: #262928;
+  --inverse-hover: #383c3a;
+  --inverse-foreground: #ffffff;
+  --ring: #262928;
+
+  --success: #3f9a5b;
+  --warning: #d9a21b;
+  --danger: #d9534f;
+
+  --mint: #dcefd6;      --mint-fg: #2d5b38;
+  --pink: #fbdcdd;      --pink-fg: #8a3a44;
+  --lemon: #f7f0bd;     --lemon-fg: #6b5c10;
+  --sky: #dde7f8;       --sky-fg: #2f4a7a;
+  --peach: #ffe3cf;     --peach-fg: #8a4a1f;
+  --lavender: #e8e0f7;  --lavender-fg: #4e3a7a;
+
+  /* Hero mesh shader: a touch more saturated than the UI pastels so the field reads. */
+  --shader-1: #c4e6bd;
+  --shader-2: #c6d8f7;
+  --shader-3: #f6e9a6;
+  --shader-4: #f9cdd2;
+
+  --sidebar: #262928;
+  --sidebar-foreground: #f4f6f3;
+  --sidebar-muted: #a3aaa5;
+  --sidebar-hover: rgb(255 255 255 / 0.06);
+  --sidebar-border: rgb(255 255 255 / 0.08);
+
+  --overlay: rgb(30 35 33 / 0.35);
+  --shadow-soft: 0 1px 2px rgb(30 40 35 / 0.04), 0 10px 30px -12px rgb(30 40 35 / 0.16);
+  --shadow-lift: 0 2px 4px rgb(30 40 35 / 0.05), 0 18px 40px -14px rgb(30 40 35 / 0.22);
+  --shadow-sm: 0 1px 2px rgb(30 40 35 / 0.06);
+  --shadow-md: var(--shadow-soft);
+  --shadow-lg: var(--shadow-lift);
+  color-scheme: light;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.dark {
+  --canvas: #151716;
+  --canvas-gradient: linear-gradient(160deg, #141615 0%, #171a19 55%, #16181c 100%);
+  --background: #1f2220;
+  --background-secondary: #262a28;
+  --foreground: #eef1ed;
+  --foreground-muted: #a6aea8;
+  --foreground-subtle: #6f776f;
+  --border: #2e3330;
+  --border-strong: #3e4541;
+  --muted: #2a2e2c;
+  --muted-hover: #343937;
+  --inverse: #f1f3ef;
+  --inverse-hover: #d9ddd7;
+  --inverse-foreground: #1a1c1b;
+  --ring: #f1f3ef;
+
+  --success: #6cc98a;
+  --warning: #e6b94a;
+  --danger: #ee7b76;
+
+  --mint: #24382c;      --mint-fg: #a9ddb5;
+  --pink: #3e2628;      --pink-fg: #f2b3b7;
+  --lemon: #3a3620;     --lemon-fg: #e7da8a;
+  --sky: #232e42;       --sky-fg: #a9c2f0;
+  --peach: #3f2c20;     --peach-fg: #f0be9a;
+  --lavender: #2e2840;  --lavender-fg: #c9b8f0;
+
+  --shader-1: #1f4632;
+  --shader-2: #1f3358;
+  --shader-3: #4a4320;
+  --shader-4: #4a2530;
+
+  --sidebar: #1a1d1b;
+  --sidebar-foreground: #eef1ed;
+  --sidebar-muted: #8f978f;
+  --sidebar-hover: rgb(255 255 255 / 0.05);
+  --sidebar-border: rgb(255 255 255 / 0.07);
+
+  --overlay: rgb(0 0 0 / 0.6);
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -12px rgb(0 0 0 / 0.5);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 18px 40px -14px rgb(0 0 0 / 0.6);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-md: var(--shadow-soft);
+  --shadow-lg: var(--shadow-lift);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-muted: var(--muted);
+  --color-muted-hover: var(--muted-hover);
+  --color-inverse: var(--inverse);
+  --color-inverse-hover: var(--inverse-hover);
+  --color-inverse-foreground: var(--inverse-foreground);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-overlay: var(--overlay);
+
+  --color-mint: var(--mint);         --color-mint-fg: var(--mint-fg);
+  --color-pink: var(--pink);         --color-pink-fg: var(--pink-fg);
+  --color-lemon: var(--lemon);       --color-lemon-fg: var(--lemon-fg);
+  --color-sky: var(--sky);           --color-sky-fg: var(--sky-fg);
+  --color-peach: var(--peach);       --color-peach-fg: var(--peach-fg);
+  --color-lavender: var(--lavender); --color-lavender-fg: var(--lavender-fg);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), "Iowan Old Style", Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Soft, generous corners everywhere. */
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+  --radius-3xl: 32px;
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-soft: var(--shadow-soft);
+  --shadow-lift: var(--shadow-lift);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    background: var(--canvas);
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--canvas);
+    background-image: var(--canvas-gradient);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  ::selection {
+    background: var(--mint);
+    color: var(--mint-fg);
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  /* Editorial display face for the two top heading levels. */
+  h1, h2 {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 30, "WONK" 0;
+    font-optical-sizing: auto;
+    letter-spacing: -0.015em;
+    font-weight: 500;
+  }
+  h3, h4 {
+    letter-spacing: -0.01em;
+  }
+  .font-display {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 30, "WONK" 0;
+    font-optical-sizing: auto;
+  }
+  /* Expressive variant: soft, wonky italics for accent words. */
+  .font-display-wonk {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+    font-optical-sizing: auto;
+  }
+
+  input, select, textarea, button {
+    font: inherit;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2398a19b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* Fluid page container: uses the screen, with margins that grow with it. */
+  .container-x {
+    width: 100%;
+    max-width: 1680px;
+    margin-inline: auto;
+    padding-inline: clamp(20px, 4.5vw, 88px);
+  }
+  .container-admin {
+    width: 100%;
+    max-width: 1560px;
+    margin-inline: auto;
+    padding-inline: clamp(20px, 3.5vw, 64px);
+  }
+
+  .scrollbar-thin { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+  .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+
+  /*
+    Hover glow for cards: nothing moves, it lights up.
+    The glow is a pseudo-element whose OPACITY animates (gradients themselves can't
+    be transitioned, which is what made the old hover feel abrupt). Its colour is
+    --glow, defaulting to the card's own text colour — on a pastel card that is the
+    tone's deep shade, so every card glows in its own hue. White cards can set
+    --glow inline to the tone they represent.
+  */
+  .lift {
+    position: relative;
+    isolation: isolate;
+    transition: box-shadow 600ms var(--ease-out-expo), border-color 600ms var(--ease-out-expo);
+  }
+  .lift::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      radial-gradient(120% 90% at 0% 0%, color-mix(in oklab, var(--glow, currentColor) 20%, transparent), transparent 62%),
+      linear-gradient(180deg, transparent 55%, color-mix(in oklab, var(--glow, currentColor) 8%, transparent));
+    transition: opacity 700ms var(--ease-out-expo);
+  }
+  .lift:hover { box-shadow: var(--shadow-lift); border-color: color-mix(in oklab, var(--glow, currentColor) 28%, var(--border)); }
+  .lift:hover::after { opacity: 1; }
+
+  .marquee { animation: marquee 60s linear infinite; }
+
+  /* Round "arrow" action used on cards: charcoal disc, brightens on hover. */
+  .arrow-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2.5rem; height: 2.5rem; border-radius: 9999px;
+    background: var(--inverse); color: var(--inverse-foreground);
+    box-shadow: var(--shadow-soft);
+    transition: background-color 200ms var(--ease-out-expo), box-shadow 200ms var(--ease-out-expo);
+  }
+  .arrow-btn:hover { background: var(--inverse-hover); box-shadow: var(--shadow-lift); }
+
+  .animate-in { animation: fade-in 260ms var(--ease-out-expo) both; }
+  .animate-slide-up { animation: slide-up 360ms var(--ease-out-expo) both; }
+  .animate-pop { animation: pop 320ms var(--ease-spring) both; }
+}
+
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
 }

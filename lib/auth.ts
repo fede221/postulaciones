@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
+import { checkRateLimit } from "./rateLimit";
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -15,9 +16,12 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const admin = await prisma.admin.findUnique({
-          where: { email: credentials.email },
-        });
+        const email = credentials.email.trim().toLowerCase();
+
+        // Brute-force brake: 8 attempts per account every 15 minutes.
+        if (!checkRateLimit(`login:${email}`, 8, 15 * 60 * 1000).ok) return null;
+
+        const admin = await prisma.admin.findUnique({ where: { email } });
 
         if (!admin) return null;
 

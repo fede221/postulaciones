@@ -1,29 +1,48 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+
 export default function Footer() {
   const developer = process.env.NEXT_PUBLIC_DEVELOPER ?? "Absolute Zero";
 
   return (
-    <footer className="bg-slate-800 text-slate-300 py-10 mt-auto">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs">ME</span>
-            </div>
-            <span className="font-semibold text-white">DB Consulting</span>
-          </div>
-          <p className="text-sm text-slate-400">
-            DB Consulting
-          </p>
-          <div className="text-right">
-            <p className="text-xs text-slate-600">
-              Desarrollado por{" "}
-              <span className="text-slate-400 font-semibold">Federico Lopez</span>
-            </p>
-            <p className="text-xs text-slate-700 mt-0.5">
-              © {new Date().getFullYear()} {developer} · Todos los derechos reservados.
-            </p>
-          </div>
-        </div>
+    <footer className="mt-auto overflow-hidden border-t border-border/70">
+      <div className="container-x flex flex-col gap-8 pt-12 md:flex-row md:items-start md:justify-between">
+        <p className="max-w-sm text-sm leading-relaxed text-foreground-muted">
+          Portal de empleo de DB Consulting. Mirá las búsquedas abiertas o dejanos tu CV para las próximas.
+        </p>
+
+        <nav className="flex flex-wrap gap-x-8 gap-y-3 text-sm" aria-label="Pie de página">
+          {[
+            { href: "/jobs", label: "Puestos" },
+            { href: "/cv-drop", label: "Postulación espontánea" },
+            { href: "/admin/login", label: "Acceso RRHH" },
+          ].map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="group inline-flex items-center gap-1 text-foreground-muted transition-colors duration-300 hover:text-foreground"
+            >
+              {l.label}
+              <ArrowUpRight
+                className="size-3.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                strokeWidth={1.75}
+                aria-hidden
+              />
+            </Link>
+          ))}
+        </nav>
+      </div>
+
+      {/* Oversized wordmark: the page signs off like a magazine back cover */}
+      <div className="container-x pt-10" aria-hidden>
+        <p className="select-none whitespace-nowrap font-display text-[clamp(64px,15.5vw,260px)] font-medium leading-[0.82] tracking-[-0.04em] text-foreground/[0.07]">
+          DB <span className="font-display-wonk font-normal italic">Consulting</span>
+        </p>
+      </div>
+
+      <div className="container-x flex flex-col gap-1 border-t border-border/60 py-5 font-mono text-[11px] uppercase tracking-[0.12em] text-foreground-subtle sm:flex-row sm:items-center sm:justify-between">
+        <span>© {new Date().getFullYear()} DB Consulting</span>
+        <span>Desarrollado por {developer}</span>
       </div>
     </footer>
   );

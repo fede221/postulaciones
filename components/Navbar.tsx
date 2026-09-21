@@ -1,55 +1,99 @@
 "use client";
+import * as React from "react";
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/cn";
+import { ButtonLink } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Wordmark } from "@/components/Logo";
+import { Collapsible } from "@/components/ui/collapsible";
+
+const LINKS = [
+  { href: "/", label: "Inicio" },
+  { href: "/jobs", label: "Puestos" },
+  { href: "/cv-drop", label: "Postulación espontánea" },
+];
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
+  const pathname = usePathname();
+
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <nav className="bg-white shadow-sm border-b border-slate-200">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">ME</span>
-            </div>
-            <span className="font-bold text-xl text-slate-800">DB Consulting</span>
-          </Link>
+    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-5">
+      <div
+        className={cn(
+          "mx-auto flex h-14 items-center justify-between rounded-full border transition-[max-width,background-color,border-color,box-shadow,padding] duration-500 ease-[var(--ease-out-expo)]",
+          scrolled || open
+            ? "max-w-[1240px] border-border/70 bg-background/85 px-4 shadow-soft backdrop-blur-md sm:px-6"
+            : "max-w-[1680px] border-transparent bg-transparent px-[clamp(8px,3vw,64px)]"
+        )}
+      >
+        <Wordmark href="/" />
 
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-slate-600 hover:text-blue-600 transition-colors text-sm font-medium">
-              Inicio
-            </Link>
-            <Link href="/jobs" className="text-slate-600 hover:text-blue-600 transition-colors text-sm font-medium">
-              Puestos disponibles
-            </Link>
-          </div>
+        <nav className="hidden items-center gap-1 md:flex" aria-label="Principal">
+          {LINKS.map((l) => {
+            const active = l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors duration-300",
+                  active
+                    ? "bg-foreground/[0.09] text-foreground"
+                    : "text-foreground-muted hover:bg-foreground/[0.07] hover:text-foreground"
+                )}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
+        </nav>
 
-          <Link
-            href="/jobs"
-            className="hidden md:inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-          >
-            Ver oportunidades
-          </Link>
-
-          <button className="md:hidden" onClick={() => setOpen(!open)}>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={open ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-            </svg>
-          </button>
+        <div className="hidden items-center gap-3 md:flex">
+          <ThemeToggle />
+          <ButtonLink href="/jobs" size="sm">Ver puestos</ButtonLink>
         </div>
+
+        <button
+          type="button"
+          className="flex size-9 items-center justify-center rounded-full text-foreground-muted hover:bg-muted hover:text-foreground md:hidden"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-label={open ? "Cerrar menú" : "Abrir menú"}
+        >
+          {open ? <X className="size-5" strokeWidth={1.75} /> : <Menu className="size-5" strokeWidth={1.75} />}
+        </button>
       </div>
 
-      {open && (
-        <div className="md:hidden bg-white border-t border-slate-100 px-4 py-4 space-y-3">
-          <Link href="/" className="block text-slate-600 hover:text-blue-600 text-sm font-medium" onClick={() => setOpen(false)}>
-            Inicio
-          </Link>
-          <Link href="/jobs" className="block text-slate-600 hover:text-blue-600 text-sm font-medium" onClick={() => setOpen(false)}>
-            Puestos disponibles
-          </Link>
+      <Collapsible open={open} className="mx-auto max-w-[1240px] md:hidden">
+        <div className="mt-2 rounded-lg border border-border/70 bg-background/95 px-5 py-3 shadow-lift backdrop-blur-md">
+          {LINKS.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="block rounded-md px-2 py-2 text-sm text-foreground-muted hover:bg-muted hover:text-foreground"
+            >
+              {l.label}
+            </Link>
+          ))}
+          <div className="mt-2 flex items-center justify-between border-t border-border pt-3">
+            <ThemeToggle />
+            <ButtonLink href="/jobs" size="sm" onClick={() => setOpen(false)}>Ver puestos</ButtonLink>
+          </div>
         </div>
-      )}
-    </nav>
+      </Collapsible>
+    </header>
   );
 }

@@ -1,16 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { adminRoute } from "@/lib/adminApi";
 import { analyzeCvWithAI } from "@/lib/openrouter";
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+type Ctx = { params: Promise<{ id: string }> };
 
+export const POST = adminRoute<Ctx>(async (_req, { params }) => {
   const { id } = await params;
 
   const app = await prisma.application.findUnique({
@@ -52,4 +47,4 @@ export async function POST(
   await prisma.application.update({ where: { id }, data: updates });
 
   return NextResponse.json({ success: true, summary: result.summary, profile: result.profile });
-}
+});
