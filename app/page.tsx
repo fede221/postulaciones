@@ -50,9 +50,9 @@ export default async function Home() {
           <HeroShader className="h-full w-full" />
         </div>
 
-        <div className="container-x relative flex min-h-[min(86vh,900px)] flex-col justify-center pb-20 pt-16 sm:pb-28 sm:pt-24">
+        <div className="container-x relative flex min-h-[min(86vh,900px)] flex-col justify-center pb-[clamp(3rem,9vh,7rem)] pt-[clamp(2rem,7vh,6rem)]">
           <Reveal y={12} duration={0.6}>
-            <p className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-foreground/10 bg-background/60 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-foreground-muted backdrop-blur">
+            <p className="mb-[clamp(1.25rem,3.5vh,2rem)] inline-flex items-center gap-2.5 rounded-full border border-foreground/10 bg-background/60 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-foreground-muted backdrop-blur">
               <span className="relative flex size-2">
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-mint-fg/60 motion-reduce:hidden" />
                 <span className="relative inline-flex size-2 rounded-full bg-mint-fg" />
@@ -61,11 +61,13 @@ export default async function Home() {
             </p>
           </Reveal>
 
-          <h1 className="max-w-[14ch] text-[52px] leading-[0.98] tracking-[-0.035em] text-foreground sm:text-[88px] lg:text-[116px] xl:text-[136px]">
+          {/* Fluid size bounded by BOTH axes: width so words never outgrow the line, height so the
+              buttons stay above the fold on short laptop screens. */}
+          <h1 className="max-w-[15ch] text-[clamp(2.75rem,min(8.4vw,13.5vh),8.5rem)] leading-[1.02] tracking-[-0.035em] text-foreground">
             <SplitWords text="Tu próximo capítulo empieza acá." accent="capítulo" />
           </h1>
 
-          <div className="mt-10 lg:mt-14">
+          <div className="mt-[clamp(1.5rem,5vh,3.5rem)]">
               <Reveal delay={0.45} y={16}>
                 <p className="max-w-xl text-[17px] leading-relaxed text-foreground-muted sm:text-xl">
                   En DB Consulting buscamos personas que quieran crecer con nosotros. Mirá los puestos
@@ -73,7 +75,7 @@ export default async function Home() {
                 </p>
               </Reveal>
               <Reveal delay={0.6} y={16}>
-                <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="mt-[clamp(1.5rem,4vh,2.25rem)] flex flex-col gap-3 sm:flex-row sm:items-center">
                   <ButtonLink href="/jobs" size="xl">
                     Ver puestos disponibles
                     <ArrowRight strokeWidth={1.75} aria-hidden />

@@ -84,17 +84,26 @@ export function SplitWords({
       {words.map((w, i) => {
         const isAccent = accent && w.replace(/[.,]/g, "") === accent;
         return (
-          <span key={i} className="inline-block overflow-hidden pb-[0.12em] align-bottom">
-            <motion.span
-              className="inline-block"
-              initial={{ y: "110%", opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={reduced ? { duration: 0 } : { duration: 0.9, delay: delay + i * 0.07, ease: EASE }}
-            >
-              <span className={isAccent ? "font-display-wonk italic text-mint-fg" : undefined}>{w}</span>
-            </motion.span>
-            {i < words.length - 1 && " "}
-          </span>
+          <React.Fragment key={i}>
+            {/*
+              The mask only needs to hide the word while it rises from BELOW, so it clips the
+              bottom edge alone. clip-path with negative insets leaves the sides and top open:
+              italic overhang (the "o" of an italic word) and accents are never cut, which
+              `overflow: hidden` did on some screens.
+            */}
+            <span className="inline-block pb-[0.14em] align-bottom [clip-path:inset(-0.4em_-0.5em_0_-0.5em)]">
+              <motion.span
+                className="inline-block"
+                initial={{ y: "110%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={reduced ? { duration: 0 } : { duration: 0.9, delay: delay + i * 0.07, ease: EASE }}
+              >
+                <span className={isAccent ? "font-display-wonk italic text-mint-fg" : undefined}>{w}</span>
+              </motion.span>
+            </span>
+            {/* The space lives OUTSIDE the inline-block: a trailing space inside one is collapsed away. */}
+            {i < words.length - 1 ? " " : null}
+          </React.Fragment>
         );
       })}
     </span>
