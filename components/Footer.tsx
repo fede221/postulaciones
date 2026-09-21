@@ -35,7 +35,8 @@ export default function Footer() {
 
       {/* Oversized wordmark: the page signs off like a magazine back cover */}
       <div className="container-x pt-10" aria-hidden>
-        <p className="select-none whitespace-nowrap font-display text-[clamp(64px,15.5vw,260px)] font-medium leading-[0.82] tracking-[-0.04em] text-foreground/[0.07]">
+        {/* Purely viewport-relative (no px floor): a fixed minimum made it overflow and get cut on phones. */}
+        <p className="select-none whitespace-nowrap font-display text-[min(13.6vw,240px)] font-medium leading-[0.9] tracking-[-0.04em] text-foreground/[0.07]">
           DB <span className="font-display-wonk font-normal italic">Consulting</span>
         </p>
       </div>
