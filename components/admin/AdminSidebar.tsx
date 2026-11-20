@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   Search,
+  Settings,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -29,6 +30,7 @@ const NAV = [
   { href: "/admin/candidates", label: "Candidatos", icon: Sparkles },
   { href: "/admin/cv-drops", label: "CVs espontáneos", icon: FileInput },
   { href: "/admin/search", label: "Búsqueda", icon: Search },
+  { href: "/admin/users", label: "Usuarios", icon: Settings },
 ];
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
